@@ -168,4 +168,4 @@ def create_feature_matrix(all_samples, all_labels):
     finger_openess = finger_openness(sample)
     FEATURE_MATRIX[i][FINGER_OPENNESS] = finger_openess
 
-    return FEATURE_MATRIX
+  return FEATURE_MATRIX
