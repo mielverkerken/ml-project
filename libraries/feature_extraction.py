@@ -129,3 +129,43 @@ def get_hand_movement(sample):
         # Right Hand
         finger_openness_feature[k + 5, j] = arclength(hand_R[1 + 4 * k:5 + 4 * k])
     return finger_openness_feature
+
+def create_feature_matrix(all_samples, all_labels):
+  NUM_FEATURES = 5
+  NUM_SAMPLES = len(all_samples)
+
+  #FEATURE_MATRIX = np.array((NUM_SAMPLES, NUM_FEATURES))
+  FEATURE_MATRIX = [[] for _ in range(NUM_SAMPLES)]
+
+  ARM_ANGLE_FEATURE = 0
+  SHOULD_ANGLE_FEATURE = 1
+  HAND_MOVEMENT_FEATURE = 2
+  INFLECTIONS_FEATURE = 3
+  FINGER_OPENNESS = 4
+
+  for i, sample in enumerate(all_samples):
+    FEATURE_MATRIX[i] = [[] for _ in range(NUM_FEATURES)]
+
+    #angle features  
+    arm_angles = []
+    should_angles =[]
+    for j, frame in enumerate(sample):
+      pose, face, hand_L, hand_R = get_frame_parts(frame)
+      arm_angles.append(list(get_arm_angles(pose)))
+      should_angles.append(list(get_shoulder_angles(pose)))
+
+    FEATURE_MATRIX[i][ARM_ANGLE_FEATURE] = arm_angles
+    FEATURE_MATRIX[i][SHOULD_ANGLE_FEATURE] = should_angles
+
+    #hand movement features
+    if(len(sample)>1):
+      (dx_L, dy_L, dx_R, dy_R ) = get_hand_movement(sample)
+      (side_L, side_R, ups_L, ups_R) = get_number_inflections(dx_L),get_number_inflections(dx_R),get_number_inflections(dy_L) ,get_number_inflections(dy_R)
+      FEATURE_MATRIX[i][HAND_MOVEMENT_FEATURE] = [dx_L, dy_L, dx_R, dy_R]
+      FEATURE_MATRIX[i][INFLECTIONS_FEATURE] = [side_L, ups_L, side_R, ups_R]
+    
+    #finger openess features
+    finger_openess = finger_openness(sample)
+    FEATURE_MATRIX[i][FINGER_OPENNESS] = finger_openess
+
+    return FEATURE_MATRIX
