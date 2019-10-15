@@ -54,13 +54,9 @@ def finger_openness(sample):
   n_fingers = 10
   finger_openness_feature=np.zeros(len(sample), n_fingers)
   for j, frame in enumerate(sample):
-    get_frame_parts(frame)
+    _, _, hand_L, hand_R= get_frame_parts(frame)
     for k in range(int(n_fingers / 2)):
+      # Left Hand
+      finger_openness_feature[ j, k] = arclength(hand_L[1 + 4 * k:5 + 4 * k], size=4)
       # Right Hand
-      finger_openness_feature[ j, k] = arclength(frame[2][1 + 4 * k:5 + 4 * k], size=4)
-      # Right Hand
-      finger_openness_feature[ j, k + 5] = arclength(frame[3][1 + 4 * k:5 + 4 * k], size=4)
-
-  autorijden = finger_openness_feature[(all_labels == 5)]
-  af = finger_openness_feature[(all_labels == 0)]
-  print("Autorijden mean:", nonzeromean(autorijden.flatten()), "Af mean:", nonzeromean(af.flatten()))
+      finger_openness_feature[ j, k + 5] = arclength(hand_R[1 + 4 * k:5 + 4 * k], size=4)
