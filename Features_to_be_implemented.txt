@@ -1,0 +1,21 @@
+
+
+Glossary:
+d is the euclidean distance
+dx is just the plain difference in x coordinate (no abs)
+dy is just the plain difference in y coordinate (no abs)
+c is the baricenter
+mean(c) is the mean of the baricenter in all the frames
+sctl= second to last point of the finger (more reliable than last point)
+
+Features calculated on frames:
+-dy(c(shoulders), wrist)
+-d(c(head), c(hands))
+-d( sctl(thumb), mean(c(chin)))
+-d( sctl(index), mean(c(mouth)))
+-d(sctl(thumb), sctl(pink))
+-var(hands_x)
+-var(hands_y)
+Repeat above for both hands
+-dx(wrists)
+-d(sctl(indexes)
