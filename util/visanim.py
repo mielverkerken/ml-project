@@ -29,12 +29,8 @@ def animate(i,sample, ax):
   _plot_bodypart(a_hand, x, y, range(21), 116, 'magenta', ax)
 
 
-def visanim(sample, fig, ax):
-    anim = animation.FuncAnimation(fig, animate, frames=len(sample), interval=200, fargs=(sample,ax))
-    return anim
-
-
-def show_anim(fig, anim):  
-  plt.close(fig) # otherwise first frame is also plotted below video
-  HTML(anim.to_html5_video())
-  HTML(anim.to_jshtml())
+def animate_sample(sample):
+  fig, ax = plt.subplots()
+  anim = animation.FuncAnimation(fig, animate, frames=len(sample), interval=200, fargs=(sample,ax))
+  plt.close(fig)
+  return HTML(anim.to_jshtml())
