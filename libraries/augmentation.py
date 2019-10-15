@@ -4,7 +4,7 @@ def interpolate(x):
   out=[]
   for i in range(1,len(x)):
     noise=np.random.normal(size=x[i].shape)
-    out.append((x[i]+x[i-1])/2+noise)
+    out.append((x[i]+x[i-1])/2+1.5*noise)
   return np.array(out)
 
 def mirror_sample(sample):
