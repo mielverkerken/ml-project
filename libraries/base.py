@@ -26,38 +26,17 @@ def get_missing_poses(pose):
     if float(t[0]) == 0: output.append((i, t[3])) 
   return output
 
-def sample_info(sample_id):
-  label = all_labels[sample_id]
-  gloss = label_to_gloss[label]
-  person = all_persons[sample_id]
-  print("corresponds to label %d (%s) with person %s" %(label, gloss, person))
 
-
-def display_sample(sample_id):
-  sample = all_samples[sample_id]
-  tb = widgets.TabBar([str(i) for i in range(mat.shape[0])])
-  for i in range(sample.shape[0]): 
-    with tb.output_to(i):
-      V.visualize(mat[i])
-
-
-def get_value_arrays(framepart, sample_range):
+def get_value_arrays(framepart, samples):
   values_x = []
   values_y = []
   values_c = []
-  labels = []
   frame_ids = []
 
-  for sample_id in sample_range: 
-    sample = all_samples[sample_id]
-    label = all_labels[sample_id]
-    person = all_persons[sample_id]
-    label_descr = label_to_gloss[label]
-  
+  for sample in samples: 
     num_frames = sample.shape[0]
   
     for frame_index in range(num_frames):
-      labels.append(label)
       frame_ids.append(frame_index)
 
       pose, face, hand_L, hand_R = get_frame_parts(sample[frame_index])
@@ -78,7 +57,7 @@ def get_value_arrays(framepart, sample_range):
         values_x.append(hand_R[:,x_index])
         values_y.append(hand_R[:,y_index])
         values_c.append(hand_R[:,c_index]) 
-  return values_x, values_y, values_c, labels, frame_ids
+  return values_x, values_y, values_c, frame_ids
 
 # Define distance
 def dist(x,y):
