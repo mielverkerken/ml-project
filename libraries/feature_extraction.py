@@ -60,3 +60,35 @@ def finger_openness(sample):
       finger_openness_feature[ j, k] = arclength(hand_L[1 + 4 * k:5 + 4 * k], size=4)
       # Right Hand
       finger_openness_feature[ j, k + 5] = arclength(hand_R[1 + 4 * k:5 + 4 * k], size=4)
+
+
+def get_number_inflections(dy, threshold=1):
+  number_of_ups_downs = 0
+  val_pos = (dy[0] > 0)
+  for val in dy:
+    if (val_pos != (val > 0)) and abs(val) > threshold:
+      val_pos = (val>0)
+      number_of_ups_downs+=1
+  return number_of_ups_downs
+
+
+def get_hand_movement(sample):
+  derivative = [0,0,0,0]
+  for i in range(hand_left_len):
+    #first derivative with best fit line
+    dy_L = np.diff(sample[:,hand_left_offset + i,y_index])
+    dx_L = np.diff(sample[:,hand_left_offset + i,x_index])
+    dy_R = np.diff(sample[:,hand_right_offset + i,y_index])
+    dx_R = np.diff(sample[:,hand_right_offset + i,x_index]) 
+
+    derivative[0] += dx_L
+    derivative[1] += dx_R
+    derivative[2] += dy_L
+    derivative[3] += dy_R
+
+  derivative[0] /= hand_left_len 
+  derivative[1] /= hand_left_len 
+  derivative[2] /= hand_left_len 
+  derivative[3] /= hand_left_len 
+
+  return(derivative[0], derivative[1], derivative[2], derivative[3])
