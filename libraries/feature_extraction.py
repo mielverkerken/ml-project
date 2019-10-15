@@ -129,5 +129,3 @@ def get_hand_movement(sample):
         # Right Hand
         finger_openness_feature[k + 5, j] = arclength(hand_R[1 + 4 * k:5 + 4 * k])
     return finger_openness_feature
-
-  finger_openness(all_samples[1])
