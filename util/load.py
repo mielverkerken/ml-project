@@ -27,12 +27,11 @@ def load_data():
 			all_persons.append(_person)
 			
 			if int(label) not in label_to_gloss.keys():
-			label_to_gloss[int(label)] = _gloss
+				label_to_gloss[int(label)] = _gloss
                 
 	all_labels = np.array(all_labels).astype(int)
 	all_samples = np.array(all_samples)
 	all_persons = np.array(all_persons)
 
 	print("%d samples and labels loaded" %(all_labels.shape[0]))
-
 	return all_samples, all_labels, all_persons, label_to_gloss
