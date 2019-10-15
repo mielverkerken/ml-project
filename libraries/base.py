@@ -63,12 +63,6 @@ def get_value_arrays(framepart, samples):
 def dist(x,y):
   return np.sqrt(np.power(x-y,2).sum())
 
-# To measure if a finger is open or closed
-def arclength(x,size):
-  Sum=0
-  for i in range(1,size):
-    if x[i].all() and x[i-1].all():
-       Sum+=dist(x[i],x[i-1])
-  return dist(x[size-1],x[0])/(Sum+1e-5)
+
 def nonzeromean(x):
   return x[x!=0].mean()

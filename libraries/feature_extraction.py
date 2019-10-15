@@ -40,3 +40,5 @@ def get_shoulder_angles(pose):
 
   right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
   return np.degrees(left_angle), np.degrees(right_angle)
+
+def ge
