@@ -93,3 +93,41 @@ def get_hand_movement(sample):
   derivative[3] /= hand_left_len 
 
   return(derivative[0], derivative[1], derivative[2], derivative[3])
+
+  # @title finger open/closed
+
+  def stats(func):
+    def wrapper(sample):
+      out = []
+      for f in func(sample):
+        assert len(f) > 1
+        diff1 = f[(len(f) - 1) // 2] - f[0]
+        diff2 = f[-1] - f[(len(f) - 1) // 2]
+        out.extend([np.max(f), np.min(f), np.mean(f), np.max(f), np.std(f), diff1, diff2])
+      return np.array(out)
+
+    return wrapper
+
+  def arclength(x):
+    Sum = 0
+    x = x[x != 0]
+    size = len(x)
+    for i in range(1, size):
+      Sum += dist(x[i], x[i - 1])
+    return dist(x[-1], x[0]) / (Sum + 1e-5)
+
+  @stats
+  def finger_openness(sample):
+    # @title finger open/closed
+    n_fingers = 10
+    finger_openness_feature = np.zeros((n_fingers, len(sample)))
+    for j, frame in enumerate(sample):
+      _, _, hand_L, hand_R = get_frame_parts(frame)
+      for k in range(int(n_fingers / 2)):
+        # Left Hand
+        finger_openness_feature[k, j] = arclength(hand_L[1 + 4 * k:5 + 4 * k])
+        # Right Hand
+        finger_openness_feature[k + 5, j] = arclength(hand_R[1 + 4 * k:5 + 4 * k])
+    return finger_openness_feature
+
+  finger_openness(all_samples[1])
