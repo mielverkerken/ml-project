@@ -71,20 +71,25 @@ def get_shoulder_angles(pose):
 
 @stats
 def get_all_arm_angles(sample):
-  arm_angles = []
+  arm_angles_left = []
+  arm_angles_right = []
   for frame in sample:
     pose, _, _, _ = get_frame_parts(frame)
-    arm_angles.append(get_arm_angles(pose))
-  return arm_angles
+    arm_angles = get_arm_angles(pose)
+    arm_angles_left.append(arm_angles[0])
+    arm_angles_right.append(arm_angles[1])
+  return arm_angles_left, arm_angles_right
 
 @stats
 def get_all_shoulder_angles(sample):
-  shoulder_angles =[]
+  shoulder_angles_left =[]
+  shoulder_angles_right =[]
   for frame in sample:
     pose, _,_,_ = get_frame_parts(frame)
-    shoulder_angles.append(get_shoulder_angles(pose))
-  return shoulder_angles
-
+    shoulder_angles = get_shoulder_angles(pose)
+    shoulder_angles_left.append(shoulder_angles[0])
+    shoulder_angles_right.append(shoulder_angles[1])
+  return shoulder_angles_left, shoulder_angles_right
 
 
 def get_number_inflections(dy, threshold=1):
