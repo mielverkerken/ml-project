@@ -11,7 +11,7 @@ def normalize2D(frame):
   return np.vstack((norm_frame_x, norm_frame_y, norm_frame_c)).T
 
 def normilizeSample(sample):
-  norm_sample = np.empty((len(sample), NUM_KEYPOINTS, 2))
+  norm_sample = np.empty((len(sample), NUM_KEYPOINTS, 3))
   for i, frame in enumerate(sample):
     norm_sample[i] = normalize2D(frame)
   return norm_sample
