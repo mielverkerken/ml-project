@@ -344,12 +344,19 @@ def wrist_wrist_x(sample):
 
 def confidence_hands(sample):
   # Returns mean confidence of x and y coordinate over all frames of a sample. First value is for left hand, second for right hand.
-  conf_left = np.mean(sample[:,np.arange(95, 116),2])
-  conf_right = np.mean(sample[:,np.arange(116, 137),2])
-  return conf_left, conf_right
+  conf_left = np.mean(sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index])
+  conf_right = np.mean(sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index])
+  return [conf_left, conf_right]
 
 def number_of_frames(sample):
-  return len(sample)
+  return [len(sample)]
+
+@stats
+def reverse_hand_movement(sample):
+  (dx_L, dx_R, dy_L, dy_R)  = get_hand_movement_raw(sample)
+  X = dx_L*dx_R
+  Y = dy_L*dy_R
+  return(X,Y)
 
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
@@ -409,6 +416,15 @@ def generate_feature_matrix(all_samples):
 
     #expect 6 features for index index
     sample_row.extend(wrist_wrist_x(sample))
+
+    #expect 2 features for hand confidence
+    sample_row.extend(confidence_hands(sample))
+
+    #expect 12 featurs for reverse hand movement
+    sample_row.extend(reverse_hand_movement(sample))
+
+    #expect 1 feature for num frames
+    sample_row.extend(number_of_frames(sample))
 
     FEATURE_MATRIX[i] = np.array(sample_row)
   return FEATURE_MATRIX

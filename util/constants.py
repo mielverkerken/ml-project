@@ -48,8 +48,8 @@ face_offset = pose_offset + pose_len
 hand_left_offset = face_offset + face_len 
 hand_right_offset = hand_left_offset + hand_left_len
 
-NUM_FEATURES = 29
-NUM_FEATURES_WITHOUT_STATS=4
+NUM_FEATURES = 34
+NUM_FEATURES_WITHOUT_STATS=7
 ########################
 ARM_L_ANGLE_FEATURE = 0
 ARM_R_ANGLE_FEATURE = 1
@@ -80,6 +80,11 @@ THUMB_PINK_L = 25
 THUMB_PINK_R = 26
 INDEX_INDEX = 27
 WRIST_WRIST = 28
+CONF_HAND_L = 29
+CONF_HAND_R = 30
+REV_HAND_X = 31
+REV_HAND_Y = 32
+NUM_FRAMES = 33
 
 NUM_STATS = 6
 ####################
