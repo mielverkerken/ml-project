@@ -122,6 +122,31 @@ def get_hand_movement(sample):
   # @title finger open/closed
 
 
+
+def get_hand_movement_raw(sample):
+  derivative = [0,0,0,0]
+  non_zero_count = [[] for n in range(hand_left_len)]
+  for i in range(hand_left_len):
+    non_zero_count[i] = [[] for n in range(4)]
+    #first derivative with best fit line
+    dy_L = np.diff(sample[:,hand_left_offset + i,y_index])
+    dx_L = np.diff(sample[:,hand_left_offset + i,x_index])
+    dy_R = np.diff(sample[:,hand_right_offset + i,y_index])
+    dx_R = np.diff(sample[:,hand_right_offset + i,x_index]) 
+
+    derivative[0] += dx_L
+    derivative[1] += dx_R
+    derivative[2] += dy_L
+    derivative[3] += dy_R
+
+  derivative[0] /= hand_left_len 
+  derivative[1] /= hand_left_len 
+  derivative[2] /= hand_left_len 
+  derivative[3] /= hand_left_len 
+
+  return(derivative[0], derivative[1], derivative[2], derivative[3])
+
+
 def arclength(x):
   Sum = 0
   x = x[x != 0]
