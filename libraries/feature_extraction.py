@@ -17,44 +17,55 @@ def stats(func):
 
 @stats
 def get_arm_angles(pose):
-  p1 = pose[l_arm_should][:2] 
-  p2 = pose[l_arm_elbow][:2]
-  p3 = pose[l_arm_wrist][:2]
+  if np.sum(pose[l_arm_should][:2]) == 0 or np.sum(pose[l_arm_elbow][:2]) == 0 or np.sum(pose[l_arm_wrist][:2]) == 0:
+     left_angle = float('NaN')
+  else:
+    p1 = pose[l_arm_should][:2]  
+    p2 = pose[l_arm_elbow][:2]
+    p3 = pose[l_arm_wrist][:2]
 
-  v0 = np.array(p1) - np.array(p2)
-  v1 = np.array(p3) - np.array(p2)
+    v0 = np.array(p1) - np.array(p2)
+    v1 = np.array(p3) - np.array(p2)
 
-  left_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+    left_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
 
-  p1 = pose[r_arm_should][:2] 
-  p2 = pose[r_arm_elbow][:2]
-  p3 = pose[r_arm_wrist][:2]
+  if np.sum(pose[r_arm_should][:2])==0 or np.sum(pose[r_arm_elbow][:2])==0 or np.sum(pose[r_arm_wrist][:2])==0:
+    right_angle = float('NaN')
+  else:
+    p1 = pose[r_arm_should][:2] 
+    p2 = pose[r_arm_elbow][:2]
+    p3 = pose[r_arm_wrist][:2]
 
-  v0 = np.array(p1) - np.array(p2)
-  v1 = np.array(p3) - np.array(p2)
+    v0 = np.array(p1) - np.array(p2)
+    v1 = np.array(p3) - np.array(p2)
 
-  right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+    right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
   return np.degrees(left_angle), np.degrees(right_angle)
 
 @stats
 def get_shoulder_angles(pose):
-  p1 = pose[neck][:2] 
-  p2 = pose[l_arm_should][:2]
-  p3 = pose[l_arm_elbow][:2]
+  if np.sum(pose[neck][:2])==0 or np.sum(pose[l_arm_should][:2])==0 or np.sum(pose[l_arm_elbow][:2])==0:
+    left_angle = ('NaN')
+  else:
+    p1 = pose[neck][:2] 
+    p2 = pose[l_arm_should][:2]
+    p3 = pose[l_arm_elbow][:2]
 
-  v0 = np.array(p1) - np.array(p2)
-  v1 = np.array(p3) - np.array(p2)
+    v0 = np.array(p1) - np.array(p2)
+    v1 = np.array(p3) - np.array(p2)
 
-  left_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+    left_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+  if np.sum(pose[neck][:2])==0 or np.sum(pose[r_arm_should][:2])==0 or np.sum(pose[r_arm_elbow][:2])==0:
+    right_angle = ('NaN')
+  else:
+    p1 = pose[neck][:2] 
+    p2 = pose[r_arm_should][:2]
+    p3 = pose[r_arm_elbow][:2]
 
-  p1 = pose[neck][:2] 
-  p2 = pose[r_arm_should][:2]
-  p3 = pose[r_arm_elbow][:2]
+    v0 = np.array(p1) - np.array(p2)
+    v1 = np.array(p3) - np.array(p2)
 
-  v0 = np.array(p1) - np.array(p2)
-  v1 = np.array(p3) - np.array(p2)
-
-  right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
+    right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
   return np.degrees(left_angle), np.degrees(right_angle)
 
 
@@ -70,7 +81,9 @@ def get_number_inflections(dy, threshold=1):
 @stats
 def get_hand_movement(sample):
   derivative = [0,0,0,0]
+  non_zero_count = [[] for n in range(hand_left_len)]
   for i in range(hand_left_len):
+    non_zero_count[i] = [[] for n in range(4)]
     #first derivative with best fit line
     dy_L = np.diff(sample[:,hand_left_offset + i,y_index])
     dx_L = np.diff(sample[:,hand_left_offset + i,x_index])
