@@ -15,7 +15,7 @@ def stats(func):
 
   return wrapper
 
-@stats
+
 def get_arm_angles(pose):
   if np.sum(pose[l_arm_should][:2]) == 0 or np.sum(pose[l_arm_elbow][:2]) == 0 or np.sum(pose[l_arm_wrist][:2]) == 0:
      left_angle = float('NaN')
@@ -42,7 +42,6 @@ def get_arm_angles(pose):
     right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
   return np.degrees(left_angle), np.degrees(right_angle)
 
-@stats
 def get_shoulder_angles(pose):
   if np.sum(pose[neck][:2])==0 or np.sum(pose[l_arm_should][:2])==0 or np.sum(pose[l_arm_elbow][:2])==0:
     left_angle = ('NaN')
@@ -67,6 +66,24 @@ def get_shoulder_angles(pose):
 
     right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
   return np.degrees(left_angle), np.degrees(right_angle)
+
+
+@stats
+def get_all_arm_angles(sample):
+  arm_angles = []
+  for frame in sample:
+    pose, _, _, _ = get_frame_parts(frame)
+    arm_angles.append(get_arm_angles(pose))
+  return arm_angles
+
+@stats
+def get_all_shoulder_angles(sample):
+  shoulder_angles =[]
+  for frame in sample:
+    pose, _,_,_ = get_frame_parts(frame)
+    shoulder_angles.append(get_shoulder_angles(pose))
+  return shoulder_angles
+
 
 
 def get_number_inflections(dy, threshold=1):
