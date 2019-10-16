@@ -7,8 +7,8 @@ def normalize2D(frame):
   frame_c = frame[:,2]
   norm_frame_x = (frame_x - np.nanmean(frame_x)) / np.nanstd(frame_x)
   norm_frame_y = (frame_y - np.nanmean(frame_y)) / np.nanstd(frame_y)
-  norm_frame_z = (frame_z - np.nanmean(frame_z)) / np.nanstd(frame_z)
-  return np.vstack((norm_frame_x, norm_frame_y, norm_frame_z)).T
+  norm_frame_c = (frame_c - np.nanmean(frame_c)) / np.nanstd(frame_c)
+  return np.vstack((norm_frame_x, norm_frame_y, norm_frame_c)).T
 
 def normilizeSample(sample):
   norm_sample = np.empty((len(sample), NUM_KEYPOINTS, 2))
