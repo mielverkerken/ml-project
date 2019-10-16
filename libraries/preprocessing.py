@@ -1,6 +1,5 @@
 import numpy as np
-
-NUM_KEYPOINTS = 137
+from util.constants import * 
 
 def normalize2D(frame):
   frame_x = frame[:,0]
