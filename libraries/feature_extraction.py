@@ -166,7 +166,7 @@ def shoulder_wrist_y(sample):
     R.append(d_r)
     L.append(d_l)
 
-  return np.array(R), np.array(L)
+  return np.array(L), np.array(R)
 
 
 @stats
@@ -197,7 +197,7 @@ def head_hand(sample):
     R.append(d_r)
     L.append(d_l)
 
-  return np.array(R), np.array(L)
+  return np.array(L), np.array(R)
 
 
 @stats
@@ -212,7 +212,7 @@ def var_hands(sample):
     l_hand = l_hand.var(axis=0)
     R.append(r_hand)
     L.append(l_hand)
-  return np.array(R), np.array(L)
+  return np.array(L), np.array(R)
 
 
 @stats
@@ -246,7 +246,7 @@ def chin_thumb(sample):
     R.append(d_r)
     L.append(d_l)
 
-  return np.array(R), np.array(L)
+  return np.array(L), np.array(R)
 
 
 @stats
@@ -280,7 +280,7 @@ def mouth_index(sample):
     R.append(d_r)
     L.append(d_l)
 
-  return np.array(R), np.array(L)
+  return np.array(L), np.array(R)
 
 
 @stats
@@ -307,7 +307,7 @@ def thumb_pink(sample):
     d_l = float('nan') if (l_hand1 != l_hand1).any() or (l_hand2 != l_hand2).any() else dist(l_hand1, l_hand2)
     R.append(d_r)
     L.append(d_l)
-  return np.array(R), np.array(L)
+  return np.array(L), np.array(R)
 
 
 @stats
@@ -323,7 +323,7 @@ def index_index(sample):
     l_hand = l_hand.mean(axis=0)
     d = float('nan') if (r_hand != r_hand).any() or (l_hand != l_hand).any() else dist(r_hand, l_hand)
     out.append(d)
-  return np.array(out)
+  return [np.array(out)]
 
 
 @stats
@@ -349,40 +349,53 @@ def generate_feature_matrix(all_samples):
   for i, sample in enumerate(all_samples):
     sample_row = []
     if(len(sample)>1):
-      arm_angles = get_all_arm_angles(sample)
-
-      should_angles = get_all_shoulder_angles(sample)
-
-      sample_row.extend(arm_angles[:(len(arm_angles)//2)])
-      sample_row.extend(arm_angles[(len(arm_angles)//2):])
-      sample_row.extend(should_angles[:(len(should_angles)//2)])
-      sample_row.extend(should_angles[(len(should_angles)//2):])
+      #expect 12 features for arm angles 
+      sample_row.extend(get_all_arm_angles(sample))
+      #expect 12 features for shoulder angles
+      sample_row.extend(get_all_shoulder_angles(sample))
 
     else:
       sample_row.extend([float('NaN')]*24)
 
     #hand movement features
     if(len(sample)>2):
-      hand_movements = get_hand_movement(sample)
-  
-      sample_row.extend(hand_movements[:(len(hand_movements)//4)])
-      sample_row.extend(hand_movements[(len(hand_movements)//4)*1:(len(hand_movements)//4)*2] )  
-      sample_row.extend(hand_movements[(len(hand_movements)//4)*2:(len(hand_movements)//4)*3])
-      sample_row.extend(hand_movements[(len(hand_movements)//4)*3:(len(hand_movements)//4)*4])
+      #expect 24 features for the hand movement
+      sample_row.extend(get_hand_movement(sample))
 
       (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
       (side_L, side_R, ups_L, ups_R) = get_number_inflections(dx_L),get_number_inflections(dx_R),get_number_inflections(dy_L) ,get_number_inflections(dy_R)
+      #expect 4 features for the inflection points
+      sample_row.extend([ups_L, ups_R, side_L, side_R])
 
-      sample_row.append(ups_L)
-      sample_row.append(ups_R)
-      sample_row.append(side_L)
-      sample_row.append(side_R)
     else:
       sample_row.extend([float('NaN')]*28)  
 
-    #finger openess features
-    finger_openess = finger_openness(sample)
-    sample_row.extend(finger_openess[:len(finger_openess)])
+    #expect 60 features for finger openness
+    sample_row.extend(finger_openness(sample))
+
+    #expect 12 features for shoulder wrist
+    sample_row.extend(shoulder_wrist_y(sample))
+
+    #expect 12 featurs for head hand
+    sample_row.extend(head_hand(sample))
+
+    #expect 24 featurs for hands variation
+    sample_row.extend(var_hands(sample))
+
+    #expect 12 features for chin thumb
+    sample_row.extend(chin_thumb(sample))
+
+    #expect 12 features for mouth index
+    sample_row.extend(mouth_index(sample))
+
+    #expect 12 features for thumb pink
+    sample_row.extend(thumb_pink(sample))
+
+    #expect 6 features for index index
+    sample_row.extend(index_index(sample))
+
+    #expect 6 features for index index
+    sample_row.extend(wrist_wrist_x(sample))
 
     FEATURE_MATRIX[i] = np.array(sample_row)
   return FEATURE_MATRIX
