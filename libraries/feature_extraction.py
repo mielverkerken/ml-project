@@ -207,27 +207,26 @@ def create_feature_matrix(all_samples, all_labels):
       FEATURE_MATRIX[i][INFLECTIONS_L_HOR_FEATURE] = side_L
       FEATURE_MATRIX[i][INFLECTIONS_R_HOR_FEATURE] = side_R
 
+def arclength(x):
+  Sum = 0
+  x = x[(x != 0).all(axis=1)]
+  size = x.shape[0]
+  if size == 0:
+    return float('nan')
+  for i in range(1, size):
+    Sum += dist(x[i], x[i - 1])
+  return dist(x[-1], x[0]) / (Sum + 1e-5)
 
-  def arclength(x):
-    Sum = 0
-    x = x[(x != 0).all(axis=1)]
-    size = x.shape[0]
-    if size == 0:
-      return float('nan')
-    for i in range(1, size):
-      Sum += dist(x[i], x[i - 1])
-    return dist(x[-1], x[0]) / (Sum + 1e-5)
-
-  @stats
-  def finger_openness(sample):
-    # @title finger open/closed
-    n_fingers = 10
-    finger_openness_feature = np.zeros((n_fingers, len(sample)))
-    for j, frame in enumerate(sample):
-      _, _, hand_L, hand_R = get_frame_parts(frame)
-      for k in range(int(n_fingers / 2)):
-        # Left Hand
-        finger_openness_feature[k, j] = arclength(hand_L[1 + 4 * k:5 + 4 * k])
-        # Right Hand
-        finger_openness_feature[k + 5, j] = arclength(hand_R[1 + 4 * k:5 + 4 * k])
-    return finger_openness_feature
+@stats
+def finger_openness(sample):
+  # @title finger open/closed
+  n_fingers = 10
+  finger_openness_feature = np.zeros((n_fingers, len(sample)))
+  for j, frame in enumerate(sample):
+    _, _, hand_L, hand_R = get_frame_parts(frame)
+    for k in range(int(n_fingers / 2)):
+      # Left Hand
+      finger_openness_feature[k, j] = arclength(hand_L[1 + 4 * k:5 + 4 * k])
+      # Right Hand
+      finger_openness_feature[k + 5, j] = arclength(hand_R[1 + 4 * k:5 + 4 * k])
+  return finger_openness_feature
