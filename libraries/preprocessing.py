@@ -4,9 +4,11 @@ from util.constants import *
 def normalize2D(frame):
   frame_x = frame[:,0]
   frame_y = frame[:,1]
+  frame_c = frame[:,2]
   norm_frame_x = (frame_x - np.nanmean(frame_x)) / np.nanstd(frame_x)
   norm_frame_y = (frame_y - np.nanmean(frame_y)) / np.nanstd(frame_y)
-  return np.vstack((norm_frame_x, norm_frame_y)).T
+  norm_frame_z = (frame_z - np.nanmean(frame_z)) / np.nanstd(frame_z)
+  return np.vstack((norm_frame_x, norm_frame_y, norm_frame_z)).T
 
 def normilizeSample(sample):
   norm_sample = np.empty((len(sample), NUM_KEYPOINTS, 2))
