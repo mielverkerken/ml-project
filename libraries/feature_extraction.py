@@ -342,6 +342,15 @@ def wrist_wrist_x(sample):
 
   return [np.array(out)]
 
+def confidence_hands(sample):
+  # Returns mean confidence of x and y coordinate over all frames of a sample. First value is for left hand, second for right hand.
+  conf_left = np.mean(sample[:,np.arange(95, 116),2])
+  conf_right = np.mean(sample[:,np.arange(116, 137),2])
+  return conf_left, conf_right
+
+def number_of_frames(sample):
+  return len(sample)
+
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
 
