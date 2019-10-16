@@ -216,7 +216,6 @@ def var_hands(sample):
         Ry.append(r_hand[1])
         Lx.append(l_hand[0])
         Ly.append(l_hand[1])
-    print(Lx)
     return [np.array(Lx),np.array(Ly),np.array(Rx),np.array(Ry)]
 
 @stats
