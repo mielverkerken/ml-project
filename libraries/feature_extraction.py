@@ -7,10 +7,11 @@ def stats(func):
   def wrapper(sample):
     out = []
     for f in func(sample):
-      assert len(f) > 1
+      if len(f) <2:
+        return float('nan')
       diff1 = f[(len(f) - 1) // 2] - f[0]
       diff2 = f[-1] - f[(len(f) - 1) // 2]
-      out.extend([np.max(f), np.min(f), np.mean(f), np.max(f), np.std(f), diff1, diff2])
+      out.extend([np.max(f), np.min(f), np.mean(f), np.std(f), diff1, diff2])
     return np.array(out)
 
   return wrapper
