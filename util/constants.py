@@ -47,3 +47,30 @@ pose_offset = 0
 face_offset = pose_offset + pose_len
 hand_left_offset = face_offset + face_len 
 hand_right_offset = hand_left_offset + hand_left_len
+
+NUM_FEATURES = 13
+########################
+ARM_L_ANGLE_FEATURE = 0
+ARM_R_ANGLE_FEATURE = 1
+SHOULD_ANGLE_L_FEATURE = 2
+SHOULD_ANGLE_R_FEATURE = 3
+HAND_MOVEMENT_L_VERT_FEATURE = 4
+HAND_MOVEMENT_R_VERT_FEATURE = 5
+HAND_MOVEMENT_L_HOR_FEATURE = 6
+HAND_MOVEMENT_R_HOR_FEATURE = 7
+INFLECTIONS_L_VERT_FEATURE = 8
+INFLECTIONS_R_VERT_FEATURE = 9
+INFLECTIONS_L_HOR_FEATURE = 10
+INFLECTIONS_R_HOR_FEATURE = 11
+FINGER_OPENNESS = 12
+
+NUM_STATS = 6
+####################
+STAT_MAX = 0
+STAT_MIN = 1
+STAT_MEAN = 2
+STAT_STD = 3
+STAT_DIF1 = 4
+STAT_DIF2 = 5
+
+

@@ -154,28 +154,10 @@ def finger_openness(sample):
 
 
 def generate_feature_matrix(all_samples):
-  NUM_FEATURES = 13
   NUM_SAMPLES = len(all_samples)
 
   #FEATURE_MATRIX = np.array((NUM_SAMPLES, NUM_FEATURES))
   FEATURE_MATRIX = [[] for _ in range(NUM_SAMPLES)]
-
-  ARM_L_ANGLE_FEATURE = 0
-  ARM_R_ANGLE_FEATURE = 1
-  SHOULD_ANGLE_L_FEATURE = 2
-  SHOULD_ANGLE_R_FEATURE = 3
-
-  HAND_MOVEMENT_L_VERT_FEATURE = 4
-  HAND_MOVEMENT_R_VERT_FEATURE = 5
-  HAND_MOVEMENT_L_HOR_FEATURE = 6
-  HAND_MOVEMENT_R_HOR_FEATURE = 7
-
-  INFLECTIONS_L_VERT_FEATURE = 8
-  INFLECTIONS_R_VERT_FEATURE = 9
-  INFLECTIONS_L_HOR_FEATURE = 10
-  INFLECTIONS_R_HOR_FEATURE = 11
-
-  FINGER_OPENNESS = 12
 
   for i, sample in enumerate(all_samples):
     FEATURE_MATRIX[i] = [[] for _ in range(NUM_FEATURES)]
