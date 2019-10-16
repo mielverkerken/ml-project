@@ -44,7 +44,7 @@ def get_arm_angles(pose):
 
 def get_shoulder_angles(pose):
   if np.sum(pose[neck][:2])==0 or np.sum(pose[l_arm_should][:2])==0 or np.sum(pose[l_arm_elbow][:2])==0:
-    left_angle = ('NaN')
+    left_angle = float('NaN')
   else:
     p1 = pose[neck][:2] 
     p2 = pose[l_arm_should][:2]
@@ -55,7 +55,7 @@ def get_shoulder_angles(pose):
 
     left_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
   if np.sum(pose[neck][:2])==0 or np.sum(pose[r_arm_should][:2])==0 or np.sum(pose[r_arm_elbow][:2])==0:
-    right_angle = ('NaN')
+    right_angle = float('NaN')
   else:
     p1 = pose[neck][:2] 
     p2 = pose[r_arm_should][:2]
