@@ -1,6 +1,7 @@
 from util.constants import *
 from libraries.base  import *
 import numpy as np
+from tqdm import tqdm_notebook as tqdm
 
 
 def stats(func):
@@ -10,9 +11,10 @@ def stats(func):
       f=f[f==f]
       if len(f)==0:
         return [np.nan]*6
-      diff1,diff2 = (float('nan'),float('nan')) if len(f) ==1 else (f[(len(f) - 1) // 2] - f[0],f[-1] - f[(len(f) - 1) // 2])
+      diff1,diff2 = (float('nan'),float('nan')) if len(f) <=1 else (f[(len(f) - 1) // 2] - f[0],f[-1] - f[(len(f) - 1) // 2])
       out.extend([np.max(f), np.min(f), np.mean(f), np.std(f), diff1, diff2])
     return np.array(out)
+
   return wrapper
 
 
@@ -20,7 +22,7 @@ def get_arm_angles(pose):
   if np.isnan(pose[l_arm_should][0]) or np.isnan(pose[l_arm_elbow][0]) or np.isnan(pose[l_arm_wrist][0]):
      left_angle = float('NaN')
   else:
-    p1 = pose[l_arm_should][:2]  
+    p1 = pose[l_arm_should][:2]
     p2 = pose[l_arm_elbow][:2]
     p3 = pose[l_arm_wrist][:2]
 
@@ -32,7 +34,7 @@ def get_arm_angles(pose):
   if np.isnan(pose[r_arm_should][0]) or np.isnan(pose[r_arm_elbow][0]) or np.isnan(pose[r_arm_wrist][0]):
     right_angle = float('NaN')
   else:
-    p1 = pose[r_arm_should][:2] 
+    p1 = pose[r_arm_should][:2]
     p2 = pose[r_arm_elbow][:2]
     p3 = pose[r_arm_wrist][:2]
 
@@ -46,7 +48,7 @@ def get_shoulder_angles(pose):
   if np.isnan(pose[neck][0]) or np.isnan(pose[l_arm_should][0]) or np.isnan(pose[l_arm_elbow][0]):
     left_angle = float('NaN')
   else:
-    p1 = pose[neck][:2] 
+    p1 = pose[neck][:2]
     p2 = pose[l_arm_should][:2]
     p3 = pose[l_arm_elbow][:2]
 
@@ -57,7 +59,7 @@ def get_shoulder_angles(pose):
   if np.isnan(pose[neck][0]) or np.isnan(pose[r_arm_should][0]) or np.isnan(pose[r_arm_elbow][0]):
     right_angle = float('NaN')
   else:
-    p1 = pose[neck][:2] 
+    p1 = pose[neck][:2]
     p2 = pose[r_arm_should][:2]
     p3 = pose[r_arm_elbow][:2]
 
@@ -109,17 +111,17 @@ def get_hand_movement_raw(sample):
     dy_L = np.diff(sample[:,hand_left_offset + i,y_index])
     dx_L = np.diff(sample[:,hand_left_offset + i,x_index])
     dy_R = np.diff(sample[:,hand_right_offset + i,y_index])
-    dx_R = np.diff(sample[:,hand_right_offset + i,x_index]) 
+    dx_R = np.diff(sample[:,hand_right_offset + i,x_index])
 
     derivative[0] += dx_L
     derivative[1] += dx_R
     derivative[2] += dy_L
     derivative[3] += dy_R
 
-  derivative[0] /= hand_left_len 
-  derivative[1] /= hand_left_len 
-  derivative[2] /= hand_left_len 
-  derivative[3] /= hand_left_len 
+  derivative[0] /= hand_left_len
+  derivative[1] /= hand_left_len
+  derivative[2] /= hand_left_len
+  derivative[3] /= hand_left_len
 
   return(derivative[0], derivative[1], derivative[2], derivative[3])
 
@@ -218,7 +220,6 @@ def var_hands(sample):
         Ry.append(r_hand[1])
         Lx.append(l_hand[0])
         Ly.append(l_hand[1])
-    print(Lx)
     return [np.array(Lx),np.array(Ly),np.array(Rx),np.array(Ry)]
 
 @stats
@@ -344,6 +345,22 @@ def wrist_wrist_x(sample):
 
   return [np.array(out)]
 
+def confidence_hands(sample):
+  # Returns mean confidence of x and y coordinate over all frames of a sample. First value is for left hand, second for right hand.
+  conf_left = np.mean(sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index])
+  conf_right = np.mean(sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index])
+  return [conf_left, conf_right]
+
+def number_of_frames(sample):
+  return [len(sample)]
+
+@stats
+def reverse_hand_movement(sample):
+  (dx_L, dx_R, dy_L, dy_R)  = get_hand_movement_raw(sample)
+  X = dx_L*dx_R
+  Y = dy_L*dy_R
+  return(X,Y)
+
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
 
@@ -352,10 +369,10 @@ def generate_feature_matrix(all_samples):
 
   FEATURE_MATRIX = np.zeros((NUM_SAMPLES, COLUMNS))
 
-  for i, sample in enumerate(all_samples):
+  for i, sample in enumerate(tqdm(all_samples)):
     sample_row = []
     if(len(sample)>1):
-      #expect 12 features for arm angles 
+      #expect 12 features for arm angles
       sample_row.extend(get_all_arm_angles(sample))
       #expect 12 features for shoulder angles
       sample_row.extend(get_all_shoulder_angles(sample))
@@ -374,7 +391,7 @@ def generate_feature_matrix(all_samples):
       sample_row.extend([ups_L, ups_R, side_L, side_R])
 
     else:
-      sample_row.extend([float('NaN')]*28)  
+      sample_row.extend([float('NaN')]*28)
 
     #expect 60 features for finger openness
     sample_row.extend(finger_openness(sample))
@@ -402,6 +419,18 @@ def generate_feature_matrix(all_samples):
 
     #expect 6 features for index index
     sample_row.extend(wrist_wrist_x(sample))
+
+    #expect 2 features for hand confidence
+    sample_row.extend(confidence_hands(sample))
+
+    if(len(sample)>1):
+      #expect 12 featurs for reverse hand movement
+      sample_row.extend(reverse_hand_movement(sample))
+    else:
+      sample_row.extend([np.nan]*12)
+
+    #expect 1 feature for num frames
+    sample_row.extend(number_of_frames(sample))
 
     FEATURE_MATRIX[i] = np.array(sample_row)
   return FEATURE_MATRIX
