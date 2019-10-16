@@ -214,7 +214,7 @@ def create_feature_matrix(all_samples, all_labels):
 
 def arclength(x):
   Sum = 0
-  x = x[(x != 0).all(axis=1)]
+  x = x[x != x]
   size = x.shape[0]
   if size == 0:
     return float('nan')
