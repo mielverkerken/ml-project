@@ -16,10 +16,11 @@ def _plot_bodypart(adjacency, x, y, index_range, index_offset, color, ax):
                 # The y coordinate is flipped, because the origin lies in the top left corner in OpenPose
                 ax.plot([x[i + index_offset], x[j + index_offset]], [-1*y[i + index_offset], -1*y[j + index_offset]], c=color)
 
-def animate(i,sample, ax):
+def animate(i,sample, ax, norm):
   ax.clear()
-  ax.set_xlim(( 0, 455))
-  ax.set_ylim((-256, 0))
+  if not norm:
+    ax.set_xlim(( 0, 455))
+    ax.set_ylim((-256, 0))
   x = sample[i, :, 0]
   y = sample[i, :, 1]
   ax.set_title(f"Frame #{i}")
@@ -29,8 +30,8 @@ def animate(i,sample, ax):
   _plot_bodypart(a_hand, x, y, range(21), 116, 'magenta', ax)
 
 
-def animate_sample(sample):
+def animate_sample(sample, norm=False):
   fig, ax = plt.subplots()
-  anim = animation.FuncAnimation(fig, animate, frames=len(sample), interval=200, fargs=(sample,ax))
+  anim = animation.FuncAnimation(fig, animate, frames=len(sample), interval=200, fargs=(sample, ax, norm))
   plt.close(fig)
   return HTML(anim.to_jshtml())
