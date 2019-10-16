@@ -420,8 +420,11 @@ def generate_feature_matrix(all_samples):
     #expect 2 features for hand confidence
     sample_row.extend(confidence_hands(sample))
 
-    #expect 12 featurs for reverse hand movement
-    sample_row.extend(reverse_hand_movement(sample))
+    if(len(sample)>1):
+      #expect 12 featurs for reverse hand movement
+      sample_row.extend(reverse_hand_movement(sample))
+    else:
+      sample_row.extend([np.nan]*12)
 
     #expect 1 feature for num frames
     sample_row.extend(number_of_frames(sample))
