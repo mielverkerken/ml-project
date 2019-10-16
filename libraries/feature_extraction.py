@@ -202,18 +202,22 @@ def head_hand(sample):
 
 @stats
 def var_hands(sample):
-  R = []
-  L = []
-  for frame in sample:
-    _, _, r_hand, l_hand = get_frame_parts(frame)
-    r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]][:, 0:2]
-    r_hand = r_hand.var(axis=0)
-    l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]][:, 0:2]
-    l_hand = l_hand.var(axis=0)
-    R.append(r_hand)
-    L.append(l_hand)
-  return np.array(L), np.array(R)
-
+    Rx=[]
+    Ry=[]
+    Lx=[]
+    Ly=[]
+    for frame in sample:
+        _, _, r_hand,l_hand = get_frame_parts(frame)
+        r_hand=r_hand[r_hand[:,0]==r_hand[:,0]][:,0:2]
+        r_hand=r_hand.var(axis=0)
+        l_hand=l_hand[l_hand[:,0]==l_hand[:,0]][:,0:2]
+        l_hand=l_hand.var(axis=0)
+        Rx.append(r_hand[0])
+        Ry.append(r_hand[1])
+        Lx.append(l_hand[0])
+        Ly.append(l_hand[1])
+    print(Lx)
+    return [np.array(Lx),np.array(Ly),np.array(Rx),np.array(Ry)]
 
 @stats
 def chin_thumb(sample):
