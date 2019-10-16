@@ -341,41 +341,48 @@ def wrist_wrist_x(sample):
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
 
-  #FEATURE_MATRIX = np.array((NUM_SAMPLES, NUM_FEATURES))
-  FEATURE_MATRIX = [[] for _ in range(NUM_SAMPLES)]
+                  # regular statistical features                         #singular features             #finger features
+  COLUMNS = (NUM_FEATURES-NUM_FEATURES_WITHOUT_STATS-1)*NUM_STATS   + NUM_FEATURES_WITHOUT_STATS    + (NUM_STATS*10)
+
+  FEATURE_MATRIX = np.zeros((NUM_SAMPLES, COLUMNS))
 
   for i, sample in enumerate(all_samples):
-    FEATURE_MATRIX[i] = [[] for _ in range(NUM_FEATURES)]
-
-    #angle features  
+    sample_row = []
     if(len(sample)>1):
       arm_angles = get_all_arm_angles(sample)
+
       should_angles = get_all_shoulder_angles(sample)
 
-      FEATURE_MATRIX[i][ARM_L_ANGLE_FEATURE] = arm_angles[:(len(arm_angles)//2)]
-      FEATURE_MATRIX[i][ARM_R_ANGLE_FEATURE] = arm_angles[(len(arm_angles)//2):]
+      sample_row.extend(arm_angles[:(len(arm_angles)//2)])
+      sample_row.extend(arm_angles[(len(arm_angles)//2):])
+      sample_row.extend(should_angles[:(len(should_angles)//2)])
+      sample_row.extend(should_angles[(len(should_angles)//2):])
 
-      FEATURE_MATRIX[i][SHOULD_ANGLE_L_FEATURE] = should_angles[:(len(should_angles)//2)]
-      FEATURE_MATRIX[i][SHOULD_ANGLE_R_FEATURE] = should_angles[(len(should_angles)//2):]
+    else:
+      sample_row.extend([float('NaN')]*24)
 
     #hand movement features
     if(len(sample)>2):
       hand_movements = get_hand_movement(sample)
-
-      FEATURE_MATRIX[i][HAND_MOVEMENT_L_VERT_FEATURE] = hand_movements[:(len(hand_movements)//4)] 
-      FEATURE_MATRIX[i][HAND_MOVEMENT_R_VERT_FEATURE] = hand_movements[(len(hand_movements)//4)*1:(len(hand_movements)//4)*2] 
-      FEATURE_MATRIX[i][HAND_MOVEMENT_L_HOR_FEATURE] = hand_movements[(len(hand_movements)//4)*2:(len(hand_movements)//4)*3]  
-      FEATURE_MATRIX[i][HAND_MOVEMENT_R_HOR_FEATURE] = hand_movements[(len(hand_movements)//4)*3:(len(hand_movements)//4)*4]
+  
+      sample_row.extend(hand_movements[:(len(hand_movements)//4)])
+      sample_row.extend(hand_movements[(len(hand_movements)//4)*1:(len(hand_movements)//4)*2] )  
+      sample_row.extend(hand_movements[(len(hand_movements)//4)*2:(len(hand_movements)//4)*3])
+      sample_row.extend(hand_movements[(len(hand_movements)//4)*3:(len(hand_movements)//4)*4])
 
       (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
       (side_L, side_R, ups_L, ups_R) = get_number_inflections(dx_L),get_number_inflections(dx_R),get_number_inflections(dy_L) ,get_number_inflections(dy_R)
 
+      sample_row.append(ups_L)
+      sample_row.append(ups_R)
+      sample_row.append(side_L)
+      sample_row.append(side_R)
+    else:
+      sample_row.extend([float('NaN')]*28)  
 
-      FEATURE_MATRIX[i][INFLECTIONS_L_VERT_FEATURE] = ups_L
-      FEATURE_MATRIX[i][INFLECTIONS_R_VERT_FEATURE] = ups_R
-      FEATURE_MATRIX[i][INFLECTIONS_L_HOR_FEATURE] = side_L
-      FEATURE_MATRIX[i][INFLECTIONS_R_HOR_FEATURE] = side_R
-    
     #finger openess features
     finger_openess = finger_openness(sample)
-    FEATURE_MATRIX[i][FINGER_OPENNESS] = finger_openess
+    sample_row.extend(finger_openess[:len(finger_openess)])
+
+    FEATURE_MATRIX[i] = np.array(sample_row)
+  return FEATURE_MATRIX

@@ -49,6 +49,7 @@ hand_left_offset = face_offset + face_len
 hand_right_offset = hand_left_offset + hand_left_len
 
 NUM_FEATURES = 13
+NUM_FEATURES_WITHOUT_STATS=4
 ########################
 ARM_L_ANGLE_FEATURE = 0
 ARM_R_ANGLE_FEATURE = 1
