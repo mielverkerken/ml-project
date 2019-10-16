@@ -130,7 +130,7 @@ def get_hand_movement(sample):
 
 def arclength(x):
   Sum = 0
-  x = x[x != x]
+  x = x[x[:,0] != x[:,0]]
   size = x.shape[0]
   if size == 0:
     return float('nan')
