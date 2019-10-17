@@ -9,7 +9,7 @@ def interpolate(x):
 
 # auguments normalized sample by mirroring it
 def mirror_sample(sample):
-  mirror_x_mat = np.array([[-1, 0],[0, 1]])
+  mirror_x_mat = np.array([[-1, 0, 0],[0, 1, 0], [0, 0, 1]])
   mirror = np.copy(sample)
   for i, frame in enumerate(sample):
     mirror[i] = mirror[i].dot(mirror_x_mat)
