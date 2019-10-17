@@ -8,7 +8,7 @@ def stats(func):
   def wrapper(sample):
     out = []
     for f in func(sample):
-      f=f[f==f]
+      #f=f[f==f]
       if len(f)==0:
         return [np.nan]*6
       diff1,diff2 = (float('nan'),float('nan')) if len(f) <=1 else (f[(len(f) - 1) // 2] - f[0],f[-1] - f[(len(f) - 1) // 2])
