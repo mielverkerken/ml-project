@@ -9,8 +9,8 @@ def stats(func):
     out = []
     for f in func(sample):
       #f=f[f==f]
-      if len(f)==0:
-        return [np.nan]*6
+      #if f == float('nan'):
+      #  return [np.nan]*6
       diff1,diff2 = (float('nan'),float('nan')) if len(f) <=1 else (f[(len(f) - 1) // 2] - f[0],f[-1] - f[(len(f) - 1) // 2])
       out.extend([np.max(f), np.min(f), np.mean(f), np.std(f), diff1, diff2])
     return np.array(out)
@@ -197,7 +197,7 @@ def head_hand(sample):
   if len(head):
     head = np.mean(head)
   else:
-    return [float('nan')]*2
+    return [[float('nan')], [float('nan')]]
 
   for frame in sample:
     _, _, r_hand, l_hand = get_frame_parts(frame)
@@ -264,7 +264,7 @@ def chin_thumb(sample):
   if len(chin):
     chin = np.mean(chin)
   else:
-    return [float('nan')]*2
+    return [[float('nan')], [float('nan')]]
 
   for frame in sample:
     _, _, r_hand, l_hand = get_frame_parts(frame)
@@ -298,7 +298,7 @@ def mouth_index(sample):
   if len(mouth):
     mouth = np.mean(mouth)
   else:
-    return [float('nan')]*2
+    return [[float('nan')], [float('nan')]]
 
   for frame in sample:
     _, _, r_hand, l_hand = get_frame_parts(frame)
