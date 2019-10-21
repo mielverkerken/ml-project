@@ -316,8 +316,8 @@ def mouth_index(sample):
     else:
       l_hand = np.nan
 
-    d_r = float('nan') if (r_hand != r_hand).any() else dist(mouth, r_hand)
-    d_l = float('nan') if (l_hand != l_hand).any() else dist(mouth, l_hand)
+    d_r = dist(mouth, r_hand)
+    d_l = dist(mouth, l_hand)
     R.append(d_r)
     L.append(d_l)
 
