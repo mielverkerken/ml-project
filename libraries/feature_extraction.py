@@ -2,7 +2,7 @@ from util.constants import *
 from libraries.base  import *
 import numpy as np
 from tqdm import tqdm_notebook as tqdm
-
+import pandas as pd
 
 def stats(func):
   def wrapper(sample):
@@ -416,6 +416,8 @@ def reverse_hand_movement(sample):
   Y = dy_L*dy_R
   return(X,Y)
 
+
+
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
 
@@ -426,25 +428,31 @@ def generate_feature_matrix(all_samples):
 
   for i, sample in enumerate(tqdm(all_samples)):
     sample_row = []
-    if(len(sample)>1):
-      #expect 12 features for arm angles
-      sample_row.extend(get_all_arm_angles(sample))
-      #expect 12 features for shoulder angles
-      sample_row.extend(get_all_shoulder_angles(sample))
+    #expect 1 feature for num frames
+    sample_row.extend(number_of_frames(sample))
 
+    #expect 4 features for the inflection points
+    if(len(sample)>2):
+      (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
+      (side_L, side_R, ups_L, ups_R) = get_number_inflections(dx_L),get_number_inflections(dx_R),get_number_inflections(dy_L) ,get_number_inflections(dy_R)
+      sample_row.extend([ups_L, ups_R, side_L, side_R])
+    else:
+      sample_row.extend([float('NaN')]*4)
+
+    #expect 2 features for hand confidence
+    sample_row.extend(confidence_hands(sample))
+
+    #expect 12 features for arm angles
+    #expect 12 features for shoulder angles
+    if(len(sample)>1):
+      sample_row.extend(get_all_arm_angles(sample))
+      sample_row.extend(get_all_shoulder_angles(sample))
     else:
       sample_row.extend([float('NaN')]*24)
 
-    #hand movement features
+    #expect 24 features for the hand movement
     if(len(sample)>2):
-      #expect 24 features for the hand movement
       sample_row.extend(get_hand_movement(sample))
-
-      (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
-      (side_L, side_R, ups_L, ups_R) = get_number_inflections(dx_L),get_number_inflections(dx_R),get_number_inflections(dy_L) ,get_number_inflections(dy_R)
-      #expect 4 features for the inflection points
-      sample_row.extend([ups_L, ups_R, side_L, side_R])
-
     else:
       sample_row.extend([float('NaN')]*28)
 
@@ -475,17 +483,25 @@ def generate_feature_matrix(all_samples):
     #expect 6 features for index index
     sample_row.extend(wrist_wrist_x(sample))
 
-    #expect 2 features for hand confidence
-    sample_row.extend(confidence_hands(sample))
-
+    #expect 12 featurs for reverse hand movement
     if(len(sample)>1):
-      #expect 12 featurs for reverse hand movement
       sample_row.extend(reverse_hand_movement(sample))
     else:
-      sample_row.extend([np.nan]*12)
+      sample_row.extend([float('NaN')]*12)
 
-    #expect 1 feature for num frames
-    sample_row.extend(number_of_frames(sample))
-
+    #transform to numpy array
     FEATURE_MATRIX[i] = np.array(sample_row)
   return FEATURE_MATRIX
+
+
+def transform_to_panda_dataframe(MATRIX):
+  df = pd.DataFrame()
+  for feature_index, feature_col in enumerate(MATRIX.T):
+    if feature_index < NUM_FEATURES_WITHOUT_STATS:
+      df[ FEATURE_LIST[feature_index]] = feature_col
+    else: 
+      actual_feature_index = NUM_FEATURES_WITHOUT_STATS + ((feature_index - NUM_FEATURES_WITHOUT_STATS)//NUM_STATS)
+      stat_index = (feature_index-NUM_FEATURES_WITHOUT_STATS) % NUM_STATS
+      column_name = FEATURE_LIST[actual_feature_index] + '_' + STAT_LIST[stat_index]
+      df[ column_name ] = feature_col
+  return df
