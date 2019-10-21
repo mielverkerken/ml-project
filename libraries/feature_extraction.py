@@ -354,7 +354,7 @@ def thumb_pink(sample):
 
     l_hand2 = l_hand[18:21, 0:2]
     l_hand2 = l_hand2[l_hand2[:, 0] == l_hand2[:, 0]]
-    if len(l_hand):
+    if len(l_hand2):
       l_hand2 = l_hand2.mean(axis=0)
     else:
       l_hand2 = np.nan
