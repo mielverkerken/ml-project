@@ -421,8 +421,8 @@ def reverse_hand_movement(sample):
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
 
-                  # regular statistical features                         #singular features             #finger features
-  COLUMNS = (NUM_FEATURES-NUM_FEATURES_WITHOUT_STATS-1)*NUM_STATS   + NUM_FEATURES_WITHOUT_STATS    + (NUM_STATS*10)
+                  # regular statistical features                         #singular features       
+  COLUMNS = (NUM_FEATURES-NUM_FEATURES_WITHOUT_STATS)*NUM_STATS   + NUM_FEATURES_WITHOUT_STATS   
 
   FEATURE_MATRIX = np.zeros((NUM_SAMPLES, COLUMNS))
 
