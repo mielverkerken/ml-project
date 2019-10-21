@@ -163,16 +163,13 @@ def shoulder_wrist_y(sample):
     c_shoulder = body[[1, 2, 5], 1]
     c_shoulder = c_shoulder[c_shoulder == c_shoulder]
     if len(c_shoulder)==0:
-      d_r=d_l=np.nan
-      R.append(d_r)
-      L.append(d_l)
-      continue
-      
-    c_shoulder = c_shoulder.mean()
+      c_shoulder=float('nan')
+    else:
+      c_shoulder = c_shoulder.mean()
     r_wrist = body[4, 1]
     l_wrist = body[7, 1]
-    d_r = float('nan') if  r_wrist != r_wrist else c_shoulder - r_wrist
-    d_l = float('nan') if  l_wrist != l_wrist else c_shoulder - l_wrist
+    d_r =  c_shoulder - r_wrist
+    d_l =  c_shoulder - l_wrist
     R.append(d_r)
     L.append(d_l)
 
@@ -187,11 +184,9 @@ def head_hand(sample):
   for i, frame in enumerate(sample):
     _, f_head, _, _ = get_frame_parts(frame)
     f_head = f_head[f_head[:, 0] == f_head[:, 0]][:, 0:2]
-    if len(f_head)==0:
-      head[i]=np.nan
-      continue
-    f_head = f_head.mean(axis=0)
-    head[i] = f_head
+    if len(f_head):
+      f_head = f_head.mean(axis=0)
+      head[i] = f_head
 
   head = head[head[:, 0] == head[:, 0]]
   if len(head):
@@ -254,11 +249,9 @@ def chin_thumb(sample):
     _, f_head, _, _ = get_frame_parts(frame)
     f_head = f_head[7:10, 0:2]
     f_head = f_head[f_head[:, 0] == f_head[:, 0]]
-    if len(f_head) == 0:
-      chin[i] = np.nan
-      continue
-    f_head = f_head.mean(axis=0)
-    chin[i] = f_head
+    if len(f_head):
+      f_head = f_head.mean(axis=0)
+      chin[i] = f_head
 
   chin = chin[chin[:, 0] == chin[:, 0]]
   if len(chin):
@@ -270,12 +263,18 @@ def chin_thumb(sample):
     _, _, r_hand, l_hand = get_frame_parts(frame)
     r_hand = r_hand[2:5, 0:2]
     r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
-    r_hand = r_hand.mean(axis=0)
+    if len(r_hand):
+        r_hand = r_hand.mean(axis=0)
+    else:
+        r_hand=np.nan
     l_hand = l_hand[2:5, 0:2]
     l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
-    l_hand = l_hand.mean(axis=0)
-    d_r = float('nan') if (r_hand != r_hand).any() else dist(chin, r_hand)
-    d_l = float('nan') if (l_hand != l_hand).any() else dist(chin, l_hand)
+    if len(l_hand):
+      l_hand = l_hand.mean(axis=0)
+    else:
+      l_hand = np.nan
+    d_r = dist(chin, r_hand)
+    d_l = dist(chin, l_hand)
     R.append(d_r)
     L.append(d_l)
 
@@ -291,8 +290,9 @@ def mouth_index(sample):
     _, f_head, _, _ = get_frame_parts(frame)
     f_head = f_head[48:68, 0:2]
     f_head = f_head[f_head[:, 0] == f_head[:, 0]]
-    f_head = f_head.mean(axis=0)
-    mouth[i] = f_head
+    if len(f_head):
+      f_head = f_head.mean(axis=0)
+      mouth[i] = f_head
 
   mouth = mouth[mouth[:, 0] == mouth[:, 0]]
   if len(mouth):
@@ -304,10 +304,18 @@ def mouth_index(sample):
     _, _, r_hand, l_hand = get_frame_parts(frame)
     r_hand = r_hand[6:9, 0:2]
     r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
-    r_hand = r_hand.mean(axis=0)
+    if len(r_hand):
+      r_hand = r_hand.mean(axis=0)
+    else:
+      r_hand = np.nan
+
     l_hand = l_hand[6:9, 0:2]
     l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
-    l_hand = l_hand.mean(axis=0)
+    if len(l_hand):
+      l_hand = l_hand.mean(axis=0)
+    else:
+      l_hand = np.nan
+
     d_r = float('nan') if (r_hand != r_hand).any() else dist(mouth, r_hand)
     d_l = float('nan') if (l_hand != l_hand).any() else dist(mouth, l_hand)
     R.append(d_r)
@@ -325,19 +333,34 @@ def thumb_pink(sample):
 
     r_hand1 = r_hand[2:5, 0:2]
     r_hand1 = r_hand1[r_hand1[:, 0] == r_hand1[:, 0]]
-    r_hand1 = r_hand1.mean(axis=0)
+
+    if len(r_hand1):
+      r_hand1 = r_hand1.mean(axis=0)
+    else:
+      r_hand1 = np.nan
     l_hand1 = l_hand[2:5, 0:2]
     l_hand1 = l_hand1[l_hand1[:, 0] == l_hand1[:, 0]]
-    l_hand1 = l_hand1.mean(axis=0)
+    if len(l_hand1):
+      l_hand1 = l_hand1.mean(axis=0)
+    else:
+      l_hand1 = np.nan
 
     r_hand2 = r_hand[18:21, 0:2]
     r_hand2 = r_hand2[r_hand2[:, 0] == r_hand2[:, 0]]
-    r_hand2 = r_hand2.mean(axis=0)
+    if len(r_hand2):
+      r_hand2 = r_hand2.mean(axis=0)
+    else:
+      r_hand2 = np.nan
+
     l_hand2 = l_hand[18:21, 0:2]
     l_hand2 = l_hand2[l_hand2[:, 0] == l_hand2[:, 0]]
-    l_hand2 = l_hand2.mean(axis=0)
-    d_r = float('nan') if (r_hand1 != r_hand1).any() or (r_hand2 != r_hand2).any() else dist(r_hand1, r_hand2)
-    d_l = float('nan') if (l_hand1 != l_hand1).any() or (l_hand2 != l_hand2).any() else dist(l_hand1, l_hand2)
+    if len(l_hand):
+      l_hand2 = l_hand2.mean(axis=0)
+    else:
+      l_hand2 = np.nan
+
+    d_r =  dist(r_hand1, r_hand2)
+    d_l =  dist(l_hand1, l_hand2)
     R.append(d_r)
     L.append(d_l)
   return np.array(L), np.array(R)
@@ -350,11 +373,17 @@ def index_index(sample):
     _, _, r_hand, l_hand = get_frame_parts(frame)
     r_hand = r_hand[6:9, 0:2]
     r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
-    r_hand = r_hand.mean(axis=0)
+    if len(r_hand):
+      r_hand = r_hand.mean(axis=0)
+    else:
+      r_hand = np.nan
     l_hand = l_hand[6:9, 0:2]
     l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
-    l_hand = l_hand.mean(axis=0)
-    d = float('nan') if (r_hand != r_hand).any() or (l_hand != l_hand).any() else dist(r_hand, l_hand)
+    if len(l_hand):
+      l_hand = l_hand.mean(axis=0)
+    else:
+      l_hand = np.nan
+    d = dist(r_hand, l_hand)
     out.append(d)
   return [np.array(out)]
 
@@ -366,7 +395,7 @@ def wrist_wrist_x(sample):
     body, _, _, _ = get_frame_parts(frame)
     r_wrist = body[4, 0]
     l_wrist = body[7, 0]
-    d = float('nan') if l_wrist != l_wrist or r_wrist != r_wrist else l_wrist - r_wrist
+    d = l_wrist - r_wrist
     out.append(d)
 
   return [np.array(out)]
