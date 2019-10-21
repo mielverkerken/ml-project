@@ -454,7 +454,7 @@ def generate_feature_matrix(all_samples):
     if(len(sample)>2):
       sample_row.extend(get_hand_movement(sample))
     else:
-      sample_row.extend([float('NaN')]*28)
+      sample_row.extend([float('NaN')]*24)
 
     #expect 60 features for finger openness
     sample_row.extend(finger_openness(sample))
