@@ -192,7 +192,7 @@ def head_hand(sample):
   if len(head):
     head = np.mean(head)
   else:
-    return [[float('nan')], [float('nan')]]
+    return np.array([[float('nan')], [float('nan')]])
 
   for frame in sample:
     _, _, r_hand, l_hand = get_frame_parts(frame)
@@ -257,7 +257,7 @@ def chin_thumb(sample):
   if len(chin):
     chin = np.mean(chin)
   else:
-    return [[float('nan')], [float('nan')]]
+    return np.array([[float('nan')], [float('nan')]])
 
   for frame in sample:
     _, _, r_hand, l_hand = get_frame_parts(frame)
@@ -298,7 +298,7 @@ def mouth_index(sample):
   if len(mouth):
     mouth = np.mean(mouth)
   else:
-    return [[float('nan')], [float('nan')]]
+    return np.array([[float('nan')], [float('nan')]])
 
   for frame in sample:
     _, _, r_hand, l_hand = get_frame_parts(frame)
