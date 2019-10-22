@@ -79,7 +79,7 @@ def get_all_arm_angles(sample):
     arm_angles = get_arm_angles(pose)
     arm_angles_left.append(arm_angles[0])
     arm_angles_right.append(arm_angles[1])
-  return arm_angles_left, arm_angles_right
+  return np.array(arm_angles_left), np.array(arm_angles_right)
 
 @stats
 def get_all_shoulder_angles(sample):
@@ -90,7 +90,7 @@ def get_all_shoulder_angles(sample):
     shoulder_angles = get_shoulder_angles(pose)
     shoulder_angles_left.append(shoulder_angles[0])
     shoulder_angles_right.append(shoulder_angles[1])
-  return shoulder_angles_left, shoulder_angles_right
+  return np.array(shoulder_angles_left), np.array(shoulder_angles_right)
 
 
 def get_number_inflections(dy, threshold=1):
@@ -103,28 +103,25 @@ def get_number_inflections(dy, threshold=1):
   return number_of_ups_downs
 
 def get_hand_movement_raw(sample):
-  derivative = [0,0,0,0]
-  non_zero_count = [[] for n in range(hand_left_len)]
+  number_derivates = len(sample)-1
+  dx_L = np.zeros((number_derivates),  dtype=np.float)
+  dx_R = np.zeros((number_derivates),  dtype=np.float)
+  dy_L = np.zeros((number_derivates),  dtype=np.float)
+  dy_R = np.zeros((number_derivates),  dtype=np.float)
+
   for i in range(hand_left_len):
-    non_zero_count[i] = [[] for n in range(4)]
-    #first derivative with best fit line
-    dy_L = np.diff(sample[:,hand_left_offset + i,y_index])
-    dx_L = np.diff(sample[:,hand_left_offset + i,x_index])
-    dy_R = np.diff(sample[:,hand_right_offset + i,y_index])
-    dx_R = np.diff(sample[:,hand_right_offset + i,x_index])
+    dx_L += np.diff(sample[:,hand_left_offset + i,x_index])
+    dy_L += np.diff(sample[:,hand_left_offset + i,y_index])
+    dx_R += np.diff(sample[:,hand_right_offset + i,x_index])
+    dy_R += np.diff(sample[:,hand_right_offset + i,y_index])
 
-    derivative[0] += dx_L
-    derivative[1] += dx_R
-    derivative[2] += dy_L
-    derivative[3] += dy_R
+  dx_L /= hand_left_len
+  dx_R /= hand_left_len
+  dy_L /= hand_left_len
+  dy_R /= hand_left_len
 
-  derivative[0] /= hand_left_len
-  derivative[1] /= hand_left_len
-  derivative[2] /= hand_left_len
-  derivative[3] /= hand_left_len
-
-  return(derivative[0], derivative[1], derivative[2], derivative[3])
-
+  return(dx_L, dx_R, dy_L, dy_R)
+  
 @stats
 def get_hand_movement(sample):
   return get_hand_movement_raw(sample)
