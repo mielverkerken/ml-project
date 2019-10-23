@@ -8,15 +8,14 @@ def stats(func):
   def wrapper(sample):
     out = []
     for f in func(sample):
-      #f=f[f==f]
-      #if f == float('nan'):
-      #  return [np.nan]*6
-      diff1,diff2 = (float('nan'),float('nan')) if len(f) <=1 else (f[(len(f) - 1) // 2] - f[0],f[-1] - f[(len(f) - 1) // 2])
-      out.extend([np.max(f), np.min(f), np.mean(f), np.std(f), diff1, diff2])
+      f=f[f==f]
+      if len(f) == 0:
+        out.extend([np.nan]*6)
+      else:
+        diff1,diff2 =(f[(len(f) - 1) // 2] - f[0],f[-1] - f[(len(f) - 1) // 2])
+        out.extend([np.max(f), np.min(f), np.mean(f), np.std(f), diff1, diff2])
     return np.array(out)
-
   return wrapper
-
 
 def get_arm_angles(pose):
   if np.isnan(pose[l_arm_should][0]) or np.isnan(pose[l_arm_elbow][0]) or np.isnan(pose[l_arm_wrist][0]):
