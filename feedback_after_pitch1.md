@@ -10,7 +10,6 @@
 ## Augumentation
 * implement leave x frame out
 * interpolation? 
-* fix mirror augumentation (swap R with L) **URGENT**
 * principle side analysis instead of mirroring
 
 ## Splitting

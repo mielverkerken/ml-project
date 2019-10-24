@@ -42,4 +42,4 @@ def load_data():
 		test_samples.append(sample)
 
 	print("%d samples and labels loaded" %(all_labels.shape[0]))
-	return all_samples, all_labels, all_persons, label_to_gloss
+	return all_samples, all_labels, all_persons, label_to_gloss, test_samples
