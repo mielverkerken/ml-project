@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 from os.path import join as pjoin
+import glob
 
 # PATHS
 DATA_DIR = './data'
@@ -31,6 +32,14 @@ def load_data():
 	all_labels = np.array(all_labels).astype(int)
 	all_samples = np.array(all_samples)
 	all_persons = np.array(all_persons)
+
+
+	all_test_files = sorted(glob(pjoin(POSE_DIR, 'test', '*.npy')))  
+
+	test_samples = []
+	for numpy_file in all_test_files:
+		sample = np.load(numpy_file)
+		test_samples.append(sample)
 
 	print("%d samples and labels loaded" %(all_labels.shape[0]))
 	return all_samples, all_labels, all_persons, label_to_gloss
