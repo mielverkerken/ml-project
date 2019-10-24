@@ -18,6 +18,3 @@ Features calculated on frames:
 Repeat above for both hands
 -dx(wrists)
 -d(c(indexes)
-
-TODO:
-mirror augumenting, swap left and right keypoints (hands are already done)
