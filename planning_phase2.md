@@ -26,3 +26,7 @@ chain together
 ## feature analysis (Nicolas)
 - see which features are relevent
 - look at samples we missclassify and how to improve these
+
+- check to confidences (>75% 0)
+- inflation points
+- the angles

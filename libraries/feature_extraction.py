@@ -41,7 +41,7 @@ def get_arm_angles(pose):
     v1 = np.array(p3) - np.array(p2)
 
     right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
-  return np.degrees(left_angle), np.degrees(right_angle)
+  return np.abs(np.degrees(left_angle)), np.abs(np.degrees(right_angle))
 
 def get_shoulder_angles(pose):
   if np.isnan(pose[neck][0]) or np.isnan(pose[l_arm_should][0]) or np.isnan(pose[l_arm_elbow][0]):
@@ -66,7 +66,7 @@ def get_shoulder_angles(pose):
     v1 = np.array(p3) - np.array(p2)
 
     right_angle = np.math.atan2(np.linalg.det([v0,v1]),np.dot(v0,v1))
-  return np.degrees(left_angle), np.degrees(right_angle)
+  return np.abs(np.degrees(left_angle)), np.abs(np.degrees(right_angle))
 
 
 @stats
@@ -102,22 +102,28 @@ def get_number_inflections(dy, threshold=1):
   return number_of_ups_downs
 
 def get_hand_movement_raw(sample):
-  number_derivates = len(sample)-1
-  dx_L = np.zeros((number_derivates),  dtype=np.float)
-  dx_R = np.zeros((number_derivates),  dtype=np.float)
-  dy_L = np.zeros((number_derivates),  dtype=np.float)
-  dy_R = np.zeros((number_derivates),  dtype=np.float)
+  baricenter_L = []
+  baricenter_R = []
+  for frame in sample:
+    bcl = frame[hand_left_offset:hand_left_offset+hand_left_len, x_index:y_index+1]
+    bcl = bcl[bcl[:,0]==bcl[:,0]]
+    if len(bcl)==0:
+      bcl = np.array([np.nan]*2)
+    else:
+      bcl = bcl.mean(axis=0)
+    baricenter_L.append(bcl)
 
-  for i in range(hand_left_len):
-    dx_L += np.diff(sample[:,hand_left_offset + i,x_index])
-    dy_L += np.diff(sample[:,hand_left_offset + i,y_index])
-    dx_R += np.diff(sample[:,hand_right_offset + i,x_index])
-    dy_R += np.diff(sample[:,hand_right_offset + i,y_index])
 
-  dx_L /= hand_left_len
-  dx_R /= hand_left_len
-  dy_L /= hand_left_len
-  dy_R /= hand_left_len
+    bcr = frame[hand_right_offset:hand_right_offset+hand_right_len, x_index:y_index+1]
+    bcr = bcr[bcr[:,0]==bcr[:,0]]
+    if len(bcr)==0:
+      bcr = np.array([np.nan]*2)
+    else:
+      bcr = bcr.mean(axis=0)
+    baricenter_R.append(bcr)
+
+  dx_L,dy_L = np.diff(np.array(baricenter_L).T)
+  dx_R,dy_R = np.diff(np.array(baricenter_R).T)
 
   return(dx_L, dx_R, dy_L, dy_R)
   
