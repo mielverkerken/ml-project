@@ -398,8 +398,8 @@ def wrist_wrist_x(sample):
 
 def confidence_hands(sample):
   # Returns mean confidence of x and y coordinate over all frames of a sample. First value is for left hand, second for right hand.
-  conf_left = np.mean(sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index])
-  conf_right = np.mean(sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index])
+  conf_left = np.nanmean(sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index])
+  conf_right = np.nanmean(sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index])
   return [conf_left, conf_right]
 
 def number_of_frames(sample):
