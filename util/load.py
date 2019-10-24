@@ -1,7 +1,7 @@
 import numpy as np
 import csv
 from os.path import join as pjoin
-import glob
+from glob import glob
 
 # PATHS
 DATA_DIR = './data'
