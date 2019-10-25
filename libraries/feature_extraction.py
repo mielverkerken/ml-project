@@ -436,8 +436,7 @@ def generate_feature_matrix(all_samples):
     #expect 4 features for the inflection points
     if(len(sample)>2):
       (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
-      (side_L, side_R, ups_L, ups_R) = get_number_inflections(dx_L),get_number_inflections(dx_R),get_number_inflections(dy_L) ,get_number_inflections(dy_R)
-      sample_row.extend([ups_L, ups_R, side_L, side_R])
+      sample_row.extend([get_number_inflections(dy_L), get_number_inflections(dy_R), get_number_inflections(dx_L), get_number_inflections(dx_R)])
     else:
       sample_row.extend([float('NaN')]*4)
 
