@@ -16,5 +16,7 @@ def preprocess_sample(sample):
     pre_sample = remove_missing_keypoints(sample)
     return normilizeSample(pre_sample)
 
-def preprocess(all_samples):
+def preprocess(all_samples, verbose=False):
+  if verbose:
+    print(f"Preprocessing {len(all_samples)} samples")
   return np.array([preprocess_sample(s) for s in all_samples])
