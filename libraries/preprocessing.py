@@ -1,20 +1,11 @@
 import numpy as np
 from util.constants import * 
 
-def normalize2D(frame):
-  frame_x = frame[:,0]
-  frame_y = frame[:,1]
-  frame_c = frame[:,2]
-  norm_frame_x = (frame_x - np.nanmean(frame_x)) / np.nanstd(frame_x)
-  norm_frame_y = (frame_y - np.nanmean(frame_y)) / np.nanstd(frame_y)
-  norm_frame_c = (frame_c - np.nanmean(frame_c)) / np.nanstd(frame_c)
-  return np.vstack((norm_frame_x, norm_frame_y, norm_frame_c)).T
-
 def normilizeSample(sample):
-  norm_sample = np.empty((len(sample), NUM_KEYPOINTS, 3))
-  for i, frame in enumerate(sample):
-    norm_sample[i] = normalize2D(frame)
-  return norm_sample
+  # Normilize keypoint x and y coordinate by subtracting mean and dividing by std of sample
+  mean = np.append(np.nanmean(sample[:, :, 0:2], axis=(0,1)), 0)
+  std = np.append(np.nanstd(sample[:, :, 0:2], axis=(0,1)), 1)
+  return (sample - mean) / std
 
 def remove_missing_keypoints(sample):
   missing_removed = np.copy(sample)
