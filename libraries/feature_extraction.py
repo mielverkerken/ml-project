@@ -434,11 +434,12 @@ def generate_feature_matrix(all_samples):
     sample_row.extend(number_of_frames(sample))
 
     #expect 4 features for the inflection points
-    if(len(sample)>2):
+    #only worth calculating when len(dy|dx) > 1
+    if(len(sample)>3):
       (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
       sample_row.extend([get_number_inflections(dy_L), get_number_inflections(dy_R), get_number_inflections(dx_L), get_number_inflections(dx_R)])
     else:
-      sample_row.extend([float('NaN')]*4)
+      sample_row.extend([0]*4)
 
     #expect 2 features for hand confidence
     sample_row.extend(confidence_hands(sample))
@@ -449,13 +450,13 @@ def generate_feature_matrix(all_samples):
       sample_row.extend(get_all_arm_angles(sample))
       sample_row.extend(get_all_shoulder_angles(sample))
     else:
-      sample_row.extend([float('NaN')]*24)
+      sample_row.extend([0]*24)
 
     #expect 24 features for the hand movement
     if(len(sample)>2):
       sample_row.extend(get_hand_movement(sample))
     else:
-      sample_row.extend([float('NaN')]*24)
+      sample_row.extend([0]*24)
 
     #expect 60 features for finger openness
     sample_row.extend(finger_openness(sample))
@@ -488,7 +489,7 @@ def generate_feature_matrix(all_samples):
     if(len(sample)>1):
       sample_row.extend(reverse_hand_movement(sample))
     else:
-      sample_row.extend([float('NaN')]*12)
+      sample_row.extend([0]*12)
 
     #transform to numpy array
     FEATURE_MATRIX[i] = np.array(sample_row)
