@@ -9,7 +9,10 @@ def normilizeSample(sample):
 
 def remove_missing_keypoints(sample):
   missing_removed = np.copy(sample)
-  missing_removed[missing_removed == 0] = np.nan
+  # Replace x and y coordinate with 0 if confidence is negative
+  missing_removed[missing_removed[:,:,2] < 0] = 0
+  # Only replacing x and y coordinate of 0 with nan
+  missing_removed[:, :, 0:2][missing_removed[:, :, 0:2] == 0] = np.nan
   return missing_removed
 
 def preprocess_sample(sample):
