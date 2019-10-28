@@ -283,6 +283,24 @@ def chin_thumb(sample):
   return np.array(L), np.array(R)
 
 
+@stats 
+def mouth_distance(sample):
+  distances = []
+  for i, frame in enumerate(sample):
+    _, f_head, _, _ = get_frame_parts(frame)
+    f_head = f_head[:, 0:2]
+    #f_head = f_head[f_head[:, 0] == f_head[:, 0]]
+    keypoint_pairs = [[50,58], [51,57], [52,56] ]
+    d = []
+    for a,b in keypoint_pairs:
+      if not np.isnan(f_head[a,:]).any() and not np.isnan(f_head[b,:]).any():
+        d.append(dist(f_head[a,:], f_head[b,:]))
+    if len(d)>0:
+        distances.append(np.mean(d))
+  return np.array(distances)
+
+
+
 @stats
 def mouth_index(sample):
   R = []
@@ -404,15 +422,8 @@ def wrist_wrist_x(sample):
 
 def confidence_hands(sample):
   # Returns mean confidence of x and y coordinate over all frames of a sample. First value is for left hand, second for right hand.
-  if sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index].sum() == 0:
-    conf_left = 0
-  else:
-    conf_left = np.nanmean(sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index])
-  
-  if sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index].sum() == 0:
-    conf_right = 0
-  else:
-    conf_right = np.nanmean(sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index])
+  conf_left = np.nanmean(sample[:,np.arange(hand_left_offset, hand_left_offset+hand_left_len),c_index])
+  conf_right = np.nanmean(sample[:,np.arange(hand_right_offset, hand_right_offset+hand_right_len),c_index])
   return [conf_left, conf_right]
 
 def number_of_frames(sample):
@@ -442,7 +453,7 @@ def generate_feature_matrix(all_samples):
 
     #expect 4 features for the inflection points
     #only worth calculating when len(dy|dx) > 1
-    if(len(sample)>3):
+    if(len(sample)>2):
       (dx_L, dx_R, dy_L, dy_R) = get_hand_movement_raw(sample)
       sample_row.extend([get_number_inflections(dy_L), get_number_inflections(dy_R), get_number_inflections(dx_L), get_number_inflections(dx_R)])
     else:
@@ -457,7 +468,7 @@ def generate_feature_matrix(all_samples):
     sample_row.extend(get_all_shoulder_angles(sample))
 
     #expect 24 features for the hand movement
-    if(len(sample)>2):
+    if(len(sample)>1):
       sample_row.extend(get_hand_movement(sample))
     else:
       sample_row.extend([0]*24)
@@ -494,6 +505,9 @@ def generate_feature_matrix(all_samples):
       sample_row.extend(reverse_hand_movement(sample))
     else:
       sample_row.extend([0]*12)
+
+    #expect 6 features for distance between upper and lower lips
+    sample_row.extend(mouth_distance(sample))
 
     #transform to numpy array
     FEATURE_MATRIX[i] = np.array(sample_row)

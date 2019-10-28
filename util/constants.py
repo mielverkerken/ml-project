@@ -51,7 +51,7 @@ face_offset = pose_offset + pose_len
 hand_left_offset = face_offset + face_len 
 hand_right_offset = hand_left_offset + hand_left_len
 
-NUM_FEATURES = 43
+NUM_FEATURES = 44
 NUM_FEATURES_WITHOUT_STATS=7
 
 FEATURE_LIST = list([ 
@@ -99,7 +99,8 @@ FEATURE_LIST = list([
 'INDEX_INDEX',
 'WRIST_WRIST',
 'REV_HAND_X',
-'REV_HAND_Y'
+'REV_HAND_Y',
+'MOUTH_DISTANCE'
 ])
 
 NUM_STATS = 6
