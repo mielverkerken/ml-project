@@ -436,8 +436,6 @@ def reverse_hand_movement(sample):
   Y = dy_L*dy_R
   return(X,Y)
 
-
-
 def generate_feature_matrix(all_samples):
   NUM_SAMPLES = len(all_samples)
 
@@ -511,7 +509,27 @@ def generate_feature_matrix(all_samples):
 
     #transform to numpy array
     FEATURE_MATRIX[i] = np.array(sample_row)
-  return FEATURE_MATRIX
+  return concat_keypoint_means(transform_to_panda_dataframe(FEATURE_MATRIX), all_samples)
+
+def extract_keypoint_means(samples_list):
+    pose_means = [np.mean(sample[:, pose_offset:pose_offset+9, :], axis=0) for sample in samples_list]
+    pose_means = np.stack(pose_means, axis=0).reshape((len(samples_list), -1))
+    head_means = [np.mean(sample[:, face_offset:face_offset+face_len, :], axis=0) for sample in samples_list]
+    head_means = np.stack(head_means, axis=0).reshape((len(samples_list), -1))
+    left_means = [np.mean(sample[:, hand_left_offset:hand_left_offset+hand_left_len, :], axis=0) for sample in samples_list]
+    left_means = np.stack(left_means, axis=0).reshape((len(samples_list), -1))
+    right_means = [np.mean(sample[:, hand_right_offset:hand_right_offset+hand_right_len, :], axis=0) for sample in samples_list]
+    right_means = np.stack(right_means, axis=0).reshape((len(samples_list), -1))
+    features = np.concatenate((pose_means, head_means, left_means, right_means), axis=1)
+    return features
+
+def concat_keypoint_means(dataframe, all_samples):
+  keypoint_means  = extract_keypoint_means(all_samples)
+  total_features = keypoint_means.shape[1]
+  labels = ["no_name" for i in range(total_features)]
+  df = pd.DataFrame(data=keypoint_means, columns=labels)
+  X_new = pd.concat([dataframe, df], axis=1)
+  return X_new
 
 
 def transform_to_panda_dataframe(MATRIX):
@@ -525,3 +543,4 @@ def transform_to_panda_dataframe(MATRIX):
       column_name = FEATURE_LIST[actual_feature_index] + '_' + STAT_LIST[stat_index]
       df[ column_name ] = feature_col
   return df
+
