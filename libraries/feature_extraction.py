@@ -509,7 +509,7 @@ def generate_feature_matrix(all_samples):
 
     #transform to numpy array
     FEATURE_MATRIX[i] = np.array(sample_row)
-  return concat_keypoint_means(transform_to_panda_dataframe(FEATURE_MATRIX), all_samples)
+  return FEATURE_MATRIX
 
 def extract_keypoint_means(samples_list):
     pose_means = [np.mean(sample[:, pose_offset:pose_offset+9, :], axis=0) for sample in samples_list]
@@ -523,15 +523,6 @@ def extract_keypoint_means(samples_list):
     features = np.concatenate((pose_means, head_means, left_means, right_means), axis=1)
     return features
 
-def concat_keypoint_means(dataframe, all_samples):
-  keypoint_means  = extract_keypoint_means(all_samples)
-  total_features = keypoint_means.shape[1]
-  labels = ["no_name" for i in range(total_features)]
-  df = pd.DataFrame(data=keypoint_means, columns=labels)
-  X_new = pd.concat([dataframe, df], axis=1)
-  return X_new
-
-
 def transform_to_panda_dataframe(MATRIX):
   df = pd.DataFrame()
   for feature_index, feature_col in enumerate(MATRIX.T):
@@ -543,4 +534,15 @@ def transform_to_panda_dataframe(MATRIX):
       column_name = FEATURE_LIST[actual_feature_index] + '_' + STAT_LIST[stat_index]
       df[ column_name ] = feature_col
   return df
+
+def concat_keypoint_means(dataframe, all_samples):
+  keypoint_means  = extract_keypoint_means(all_samples)
+  total_features = keypoint_means.shape[1]
+  labels = ["no_name" for i in range(total_features)]
+  df = pd.DataFrame(data=keypoint_means, columns=labels)
+  X_new = pd.concat([dataframe, df], axis=1)
+  return X_new
+
+
+
 
