@@ -445,12 +445,9 @@ def generate_feature_matrix(all_samples):
     sample_row.extend(confidence_hands(sample))
 
     #expect 12 features for arm angles
+    sample_row.extend(get_all_arm_angles(sample))
     #expect 12 features for shoulder angles
-    if(len(sample)>1):
-      sample_row.extend(get_all_arm_angles(sample))
-      sample_row.extend(get_all_shoulder_angles(sample))
-    else:
-      sample_row.extend([0]*24)
+    sample_row.extend(get_all_shoulder_angles(sample))
 
     #expect 24 features for the hand movement
     if(len(sample)>2):
