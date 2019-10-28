@@ -290,14 +290,14 @@ def mouth_distance(sample):
     _, f_head, _, _ = get_frame_parts(frame)
     f_head = f_head[:, 0:2]
     #f_head = f_head[f_head[:, 0] == f_head[:, 0]]
-    keypoint_pairs = [[50,58], [51,57], [52,56] ]
+    keypoint_pairs = [[50,58], [51,57], [52,56], [61,67], [62,66], [63,65] ]
     d = []
     for a,b in keypoint_pairs:
       if not np.isnan(f_head[a,:]).any() and not np.isnan(f_head[b,:]).any():
         d.append(dist(f_head[a,:], f_head[b,:]))
     if len(d)>0:
         distances.append(np.mean(d))
-  return np.array(distances)
+  return [np.array(distances)]
 
 
 
