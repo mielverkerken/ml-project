@@ -58,14 +58,13 @@ def _plot_confusion_matrix(y_true, y_pred, classes,
     fig.tight_layout()
     return ax
 
-def plot_confusion_matrix(X, Y, group, model, scaler, labels, k=5, print=True):
+def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
     splitter = StratifiedGroupKFold(k)
     y_tot_true, y_tot_pred = np.empty(0, dtype=int), np.empty(0, dtype=int)
     for train_index, test_index in splitter.split(X, Y, group):
         x_train, x_test, y_train, y_test = X[train_index], X[test_index], Y[train_index], Y[test_index]
-        x_scale = scaler.fit_transform(x_train)
-        model.fit(x_scale, y_train)
-        y_pred = model.predict(scaler.transform(x_test))
+        cv.fit(x_train, y_train)
+        y_pred = cv.predict(x_test)
         y_tot_true = np.concatenate((y_tot_true, y_test), axis=0)
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
