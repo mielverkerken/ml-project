@@ -3,6 +3,8 @@ from sklearn.utils.multiclass import unique_labels
 import numpy as np
 import matplotlib.pyplot as plt
 from libraries.data_split import StratifiedGroupKFold
+from sklearn.model_selection import learning_curve
+import util.helpers as H
 
 def _plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
@@ -68,3 +70,13 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
         y_tot_true = np.concatenate((y_tot_true, y_test), axis=0)
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
+
+def plot_learning_curve(X, y, group, cv, k=5):
+    train_sizes, train_scores, valid_scores = learning_curve(cv, X, y, groups=group, train_sizes=np.linspace(0.3, 1.0, 8), cv=StratifiedGroupKFold(k), scoring=H.mapk_scorer)
+    plt.figure()
+    plt.plot(train_sizes, train_scores, 'g-', label="train")
+    plt.plot(train_sizes, valid_scores, 'r-', label="validate")
+    plt.xlabel("Training examples (%)")
+    plt.ylabel("map@3")
+    plt.legend()
+    plt.show()
