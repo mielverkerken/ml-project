@@ -65,7 +65,7 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
     y_tot_true, y_tot_pred = np.empty(0, dtype=int), np.empty(0, dtype=int)
     for train_index, test_index in splitter.split(X, Y, group):
         x_train, x_test, y_train, y_test = X[train_index], X[test_index], Y[train_index], Y[test_index]
-        cv.fit(x_train, y_train)
+        cv.fit(x_train, y_train, group)
         y_pred = cv.predict(x_test)
         y_tot_true = np.concatenate((y_tot_true, y_test), axis=0)
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
