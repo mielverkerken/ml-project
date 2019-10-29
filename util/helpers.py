@@ -36,6 +36,10 @@ def mapk_scorer(estimator, X, y):
     probas = estimator.predict_proba(X)
     return mapk(probas, y)
 
+def top3_acc_scorer(estimator, X, y):
+    probas = estimator.predict_proba(X)
+    return top3_accuracy(probas, y)
+
 def get_ordered_predictions(probabilities):
     """For every sample in X, return a list of predictions.
     Per sample, the predictions are ordered via their corresponding (descending) probability.
