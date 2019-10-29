@@ -92,13 +92,17 @@ def get_all_shoulder_angles(sample):
   return np.array(shoulder_angles_left), np.array(shoulder_angles_right)
 
 
-def get_number_inflections(dy, threshold=1):
+def get_number_inflections(dy, threshold=0.05):
   number_of_ups_downs = 0
   val_pos = (dy[0] > 0)
+  accumulator = 0  
   for val in dy:
-    if (val_pos != (val > 0)) and abs(val) > threshold:
-      val_pos = (val>0)
-      number_of_ups_downs+=1
+    if (val_pos != (val > 0)):
+        accumulator += abs(val)
+        if accumulator > threshold:
+          val_pos = (val>0)
+          number_of_ups_downs+=1
+          accumulator = 0
   return number_of_ups_downs
 
 def get_hand_movement_raw(sample):
