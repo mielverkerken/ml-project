@@ -1,10 +1,13 @@
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
+import numpy as np
+import matplotlib.pyplot as plt
+from libraries.data_split import StratifiedGroupKFold
 
-def plot_confusion_matrix(y_true, y_pred, classes,
+def _plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
                           title=None,
-                          cmap=plt.cm.Blues):
+                          cmap=plt.cm.Blues, print_cm=True):
     """
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
@@ -17,7 +20,8 @@ def plot_confusion_matrix(y_true, y_pred, classes,
 
     # Compute confusion matrix
     cm = confusion_matrix(y_true, y_pred)
-    print(cm)
+    if print:
+        print(cm)
     # Only use the labels that appear in the data
     classes = classes[unique_labels(y_true, y_pred)]
     if normalize:
@@ -53,3 +57,15 @@ def plot_confusion_matrix(y_true, y_pred, classes,
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
     return ax
+
+def plot_confusion_matrix(X, Y, group, model, scaler, labels, k=5, print=True):
+    splitter = StratifiedGroupKFold(k)
+    y_tot_true, y_tot_pred = np.empty(0, dtype=int), np.empty(0, dtype=int)
+    for train_index, test_index in splitter.split(X, Y, group):
+        x_train, x_test, y_train, y_test = X[train_index], X[test_index], Y[train_index], Y[test_index]
+        x_scale = scaler.fit_transform(x_train)
+        model.fit(x_scale, y_train)
+        y_pred = model.predict(scaler.transform(x_test))
+        y_tot_true = np.concatenate((y_tot_true, y_test), axis=0)
+        y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
+    _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
