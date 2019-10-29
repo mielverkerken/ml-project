@@ -92,7 +92,7 @@ def get_all_shoulder_angles(sample):
   return np.array(shoulder_angles_left), np.array(shoulder_angles_right)
 
 
-def get_number_inflections(dy, threshold=1):
+def get_number_inflections(dy, threshold=0.05):
   number_of_ups_downs = 0
   val_pos = (dy[0] > 0)
   accumulator = 0  
