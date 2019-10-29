@@ -517,19 +517,19 @@ def generate_feature_matrix(all_samples):
 
 def extract_keypoint_means(samples_list):
     labels = []
-    pose_means = [np.mean(sample[:, pose_offset:pose_offset+9, :], axis=0) for sample in samples_list]
+    pose_means = [np.nanmean(sample[:, pose_offset:pose_offset+9, :], axis=0) for sample in samples_list]
     pose_means = np.stack(pose_means, axis=0).reshape((len(samples_list), -1))
     labels.extend(["keypoint_"+str(i)+"_"+j for i in range(pose_offset,pose_offset+9 ) for j in ["x","y","c"] ])
 
-    head_means = [np.mean(sample[:, face_offset:face_offset+face_len, :], axis=0) for sample in samples_list]
+    head_means = [np.nanmean(sample[:, face_offset:face_offset+face_len, :], axis=0) for sample in samples_list]
     head_means = np.stack(head_means, axis=0).reshape((len(samples_list), -1))
     labels.extend(["keypoint_"+str(i)+"_"+j for i in range(face_offset,face_offset+face_len ) for j in ["x","y","c"] ])
     
-    left_means = [np.mean(sample[:, hand_left_offset:hand_left_offset+hand_left_len, :], axis=0) for sample in samples_list]
+    left_means = [np.nanmean(sample[:, hand_left_offset:hand_left_offset+hand_left_len, :], axis=0) for sample in samples_list]
     left_means = np.stack(left_means, axis=0).reshape((len(samples_list), -1))
     labels.extend(["keypoint_"+str(i)+"_"+j for i in range(hand_left_offset,hand_left_offset+hand_left_len) for j in ["x","y","c"] ])
     
-    right_means = [np.mean(sample[:, hand_right_offset:hand_right_offset+hand_right_len, :], axis=0) for sample in samples_list]
+    right_means = [np.nanmean(sample[:, hand_right_offset:hand_right_offset+hand_right_len, :], axis=0) for sample in samples_list]
     right_means = np.stack(right_means, axis=0).reshape((len(samples_list), -1))
     labels.extend(["keypoint_"+str(i)+"_"+j for i in range(hand_right_offset,hand_right_offset+hand_right_len ) for j in ["x","y","c"] ])
     features = np.concatenate((pose_means, head_means, left_means, right_means), axis=1)
