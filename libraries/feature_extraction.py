@@ -512,16 +512,24 @@ def generate_feature_matrix(all_samples):
   return FEATURE_MATRIX
 
 def extract_keypoint_means(samples_list):
+    labels = []
     pose_means = [np.mean(sample[:, pose_offset:pose_offset+9, :], axis=0) for sample in samples_list]
     pose_means = np.stack(pose_means, axis=0).reshape((len(samples_list), -1))
+    labels.append(["keypoint_"+str(i)+"_"+j for i in range(pose_offset,pose_offset+9 ) for j in ["x","y","c"] ])
+
     head_means = [np.mean(sample[:, face_offset:face_offset+face_len, :], axis=0) for sample in samples_list]
     head_means = np.stack(head_means, axis=0).reshape((len(samples_list), -1))
+    labels.append(["keypoint_"+str(i)+"_"+j for i in range(face_offset,face_offset+face_len ) for j in ["x","y","c"] ])
+    
     left_means = [np.mean(sample[:, hand_left_offset:hand_left_offset+hand_left_len, :], axis=0) for sample in samples_list]
     left_means = np.stack(left_means, axis=0).reshape((len(samples_list), -1))
+    labels.append(["keypoint_"+str(i)+"_"+j for i in range(hand_left_offset,hand_left_offset+hand_left_len) for j in ["x","y","c"] ])
+    
     right_means = [np.mean(sample[:, hand_right_offset:hand_right_offset+hand_right_len, :], axis=0) for sample in samples_list]
     right_means = np.stack(right_means, axis=0).reshape((len(samples_list), -1))
+    labels.append(["keypoint_"+str(i)+"_"+j for i in range(hand_right_offset,hand_right_offset+hand_right_len ) for j in ["x","y","c"] ])
     features = np.concatenate((pose_means, head_means, left_means, right_means), axis=1)
-    return features
+    return features, labels
 
 def transform_to_panda_dataframe(MATRIX):
   df = pd.DataFrame()
@@ -536,10 +544,9 @@ def transform_to_panda_dataframe(MATRIX):
   return df
 
 def concat_keypoint_means(dataframe, all_samples):
-  keypoint_means  = extract_keypoint_means(all_samples)
+  keypoint_means, keypoint_labels  = extract_keypoint_means(all_samples)
   total_features = keypoint_means.shape[1]
-  labels = ["no_name" for i in range(total_features)]
-  df = pd.DataFrame(data=keypoint_means, columns=labels)
+  df = pd.DataFrame(data=keypoint_means, columns=keypoint_labels)
   X_new = pd.concat([dataframe, df], axis=1)
   return X_new
 
