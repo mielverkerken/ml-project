@@ -16,7 +16,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.model_selection import cross_val_score
 
-def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, groups=None, n_jobs=-1  k=5, verbose=True, graph=True, confusion_matrix=True, learning_curve=True):
+def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, groups=None, n_jobs=-1,  k=5, verbose=True, graph=True, confusion_matrix=True, learning_curve=True):
   pipe = Pipeline([
                    ("scale", scaler),
                    ("model", model)
