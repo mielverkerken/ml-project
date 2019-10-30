@@ -72,7 +72,6 @@ def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, grou
 
   return CV
 
-feature_range = range(20, num_features, 19))
 
 def feature_election(x_data, y_data, CV, groups, feature_range, plot=True):
     f_score_len = len(list(feature_range))
