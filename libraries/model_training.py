@@ -12,6 +12,10 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
 from sklearn.metrics import accuracy_score
 
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+from sklearn.model_selection import cross_val_score
+
 def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, groups=None,  k=5, verbose=True, graph=True, confusion_matrix=True, learning_curve=True):
   pipe = Pipeline([
                    ("scale", scaler),
@@ -67,3 +71,31 @@ def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, grou
     plot_learning_curve(x_data, y_data, groups, CV, k=k)
 
   return CV
+
+feature_range = range(20, num_features, 19))
+
+def feature_election(x_data, y_data, CV, groups, feature_range, plot=True):
+    f_score_len = len(list(feature_range))
+    f_scores = np.zeros(f_score_len)
+
+    for i, num_features in enumerate(feature_range):
+        # Select k best features based on training data
+        selector = SelectKBest(f_classif, k=num_features).fit(x_data.values, y_data)
+        # extract these features from training data
+        x_new=selector.transform(X_data.values)
+        # build and CV logistic regression model with these features
+        f_scores[i] = cross_val_score(CV.best_estimator_, x_new, y_data, cv=StratifiedGroupKFold(5), groups=groups, scoring=H.mapk_scorer ).mean()
+        print(str(num_features) + " Features gives Cross Validation Score (map@3) : ",f_scores[i])
+                  
+    if plot:
+        plt.figure()
+        plt.plot(list(feature_range), f_scores)
+        plt.show()
+
+    i = np.argmax(f_scores)
+    opt_features = list(feature_range)[i]
+
+    print()
+    print("Optimal performance of ",f_scores[i],", for ",opt_features," features")
+    
+    return f_scores, i, opt_features    
