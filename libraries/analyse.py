@@ -80,3 +80,10 @@ def plot_learning_curve(X, y, group, cv, k=5):
     plt.ylabel("map@3")
     plt.legend()
     plt.show()
+
+def top_n_logistic_model_coefficients(CV, X):
+    for i in range(CV.best_estimator_['model'].coef_.shape[0]):
+        feature_weights = zip(X.columns, CV.best_estimator_['model'].coef_[i])
+        print("***label{}***".format(i))
+        for a, b in sorted(feature_weights, key = lambda t: t[1], reverse=True)[0:5]:
+            print(a,b)

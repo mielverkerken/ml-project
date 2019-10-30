@@ -79,9 +79,9 @@ def feature_election(x_data, y_data, CV, groups, feature_range, plot=True):
 
     for i, num_features in enumerate(feature_range):
         # Select k best features based on training data
-        selector = SelectKBest(f_classif, k=num_features).fit(x_data.values, y_data)
+        selector = SelectKBest(f_classif, k=num_features).fit(x_data, y_data)
         # extract these features from training data
-        x_new=selector.transform(X_data.values)
+        x_new=selector.transform(x_data)
         # build and CV logistic regression model with these features
         f_scores[i] = cross_val_score(CV.best_estimator_, x_new, y_data, cv=StratifiedGroupKFold(5), groups=groups, scoring=H.mapk_scorer ).mean()
         print(str(num_features) + " Features gives Cross Validation Score (map@3) : ",f_scores[i])
