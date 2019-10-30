@@ -16,7 +16,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.model_selection import cross_val_score
 
-def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, groups=None,  k=5, verbose=True, graph=True, confusion_matrix=True, learning_curve=True):
+def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, groups=None, n_jobs=-1  k=5, verbose=True, graph=True, confusion_matrix=True, learning_curve=True):
   pipe = Pipeline([
                    ("scale", scaler),
                    ("model", model)
@@ -26,7 +26,7 @@ def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, grou
     
   scoring = {'mapk': H.mapk_scorer, 'topk': H.top3_acc_scorer, 'accuracy': make_scorer(accuracy_score)}
 
-  CV = GridSearchCV(pipe, tuned_param, cv=splitter, scoring=scoring, refit="mapk", verbose=1, return_train_score=True, n_jobs=-1)
+  CV = GridSearchCV(pipe, tuned_param, cv=splitter, scoring=scoring, refit="mapk", verbose=1, return_train_score=True, n_jobs=n_jobs)
   CV.fit(x_data, y_data, groups)
 
   mapk_means = CV.cv_results_['mean_test_mapk']

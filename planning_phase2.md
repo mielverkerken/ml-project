@@ -1,11 +1,11 @@
 # TODO Phase 2
 ## Linear models
-- [ ] logistic regression       (Nicola, Nicolas)
-- [ ] svm                       (Miel, Nicola)
-- [ ] random forest?            (Nicola, Miel)
+- [X] logistic regression       (Nicola, Nicolas)
+- [X] svm                       (Miel, Nicola)
+- [-] Decision Tree Classifier  (Nicola, Miel)
 - [ ] lda                       (Nicolas, Nicola)
 - [ ] naive bayes               (Nicolas, Miel)
-- [ ] knn                       (Miel, Nicolas)
+- [-] knn                       (Miel, Nicolas)
 
 ## pipeline (Miel)
 chain together
