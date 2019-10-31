@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 def interpolate(x):
   out=[]
@@ -23,3 +24,38 @@ def mirror_sample(sample):
     mirror[i][face_left_index], mirror[i][face_right_index] = mirror[i][face_right_index], mirror[i][face_left_index].copy()
   return mirror
 
+def skip_fram_agmentation(all_samples, all_labels, all_persons, min_frames=8, max_per_label = 400):
+  samples_per_label = np.empty((n_labels,),dtype=object)
+  persons_per_label = np.empty((n_labels,),dtype=object)
+  for i in range(n_labels):
+    samples_per_label[i] = []
+    persons_per_label[i] = []
+  for label, sample, person in zip(all_labels, all_samples, all_persons):
+    samples_per_label[label].append(sample)
+    persons_per_label[label].append(person)
+  for i, samples in enumerate(samples_per_label):
+    samples_per_label[i] = sorted(samples_per_label[i], key=len, reverse = True)
+  
+  for i, samples in enumerate(samples_per_label):
+    len_orig = len(samples)
+    for j in range(len_orig):
+      if len(samples_per_label[i][j]) > min_frames:
+        persons_per_label[i].append(persons_per_label[i][j])
+        samples_per_label[i].append(np.delete(samples_per_label[i][j], random.randint(0, len(samples_per_label[i][j]) - 1), axis=0))
+        persons_per_label[i].append(persons_per_label[i][j])
+        samples_per_label[i].append(np.delete(samples_per_label[i][j], random.randint(0, len(samples_per_label[i][j]) - 1), axis=0))
+  aug_samples = []
+  aug_labels = []
+  aug_persons = []
+  for label, (samples, persons) in enumerate(zip(samples_per_label, persons_per_label)):
+    count = 0
+    for sample, person in zip(samples, persons):
+      if count < max_per_label:
+        aug_samples.append(sample)
+        aug_labels.append(label)
+        aug_persons.append(person)
+      count += 1
+  return aug_samples, aug_labels, aug_persons
+    
+  
+  
