@@ -25,6 +25,7 @@ def mirror_sample(sample):
   return mirror
 
 def skip_fram_agmentation(all_samples, all_labels, all_persons, min_frames=8, max_per_label = 400):
+  n_labels = len(np.unique(all_labels))
   samples_per_label = np.empty((n_labels,),dtype=object)
   persons_per_label = np.empty((n_labels,),dtype=object)
   for i in range(n_labels):
