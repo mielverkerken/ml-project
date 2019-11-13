@@ -16,6 +16,10 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.model_selection import cross_val_score
 
+from IPython.display import HTML, display
+import pandas as pd
+import math
+
 def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, groups=None, n_jobs=-1,  k=5, verbose=True, graph=True, confusion_matrix=True, learning_curve=True):
   pipe = Pipeline([
                    ("scale", scaler),
@@ -97,4 +101,73 @@ def feature_election(x_data, y_data, CV, groups, feature_range, plot=True):
     print()
     print("Optimal performance of ",f_scores[i],", for ",opt_features," features")
     
-    return f_scores, i, opt_features    
+    return f_scores, i, opt_features   
+
+def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, feature_selection, imputer, fileName, groups=None, n_jobs=-1,  k=5, verbose=True, confusion_matrix=True):
+    pipe = Pipeline([
+      ("scale", scaler),
+      ("imputer", imputer),
+      ("feature_selection", feature_selection),
+      ("model", model)
+    ], verbose=False)
+
+    splitter = StratifiedGroupKFold(k)
+      
+    scoring = {'mapk': H.mapk_scorer, 'topk': H.top3_acc_scorer, 'accuracy': make_scorer(accuracy_score)}
+
+    CV = GridSearchCV(pipe, tuned_param, cv=splitter, scoring=scoring, refit="mapk", verbose=1, return_train_score=True, n_jobs=n_jobs)
+    CV.fit(x_data, y_data, groups)
+
+    print("Best parameters set found on development set: ",CV.best_params_)
+    print(f"Mean map@3 of best model: {CV.best_score_}")   
+
+    results_to_df(CV, tuned_param, show=verbose, fileName=fileName)
+
+    if confusion_matrix:
+      plot_confusion_matrix(x_data, y_data, groups, CV, sorted_labels, k)
+
+    return CV 
+
+def results_to_df(CV, tuned_parameters, show=True, fileName=None):
+    cv_results_test = {
+      'mean_test_mapk': CV.cv_results_['mean_test_mapk'], 
+      'std_test_mapk': CV.cv_results_['std_test_mapk'],
+      'mean_test_topk': CV.cv_results_['mean_test_topk'],
+      'std_test_topk': CV.cv_results_['std_test_topk'],
+      'mean_test_accuracy': CV.cv_results_['mean_test_accuracy'],
+      'std_test_accuracy': CV.cv_results_['std_test_accuracy'],
+    } 
+
+    cv_results_train = {
+      'mean_train_mapk': CV.cv_results_['mean_train_mapk'], 
+      'std_train_mapk': CV.cv_results_['std_train_mapk'],
+      'mean_train_topk': CV.cv_results_['mean_train_topk'],
+      'std_train_topk': CV.cv_results_['std_train_topk'],
+      'mean_train_accuracy': CV.cv_results_['mean_train_accuracy'],
+      'std_train_accuracy': CV.cv_results_['std_train_accuracy'],
+    }
+
+    keys = []
+
+    for param in tuned_parameters:
+      keys.append(param)
+      cv_results_test[param] = CV.cv_results_[f"param_{param}"].data
+      cv_results_train[param] = CV.cv_results_[f"param_{param}"].data
+
+    test_result = pd.DataFrame(cv_results_test)
+    train_result = pd.DataFrame(cv_results_train)
+    results = pd.merge(test_result, train_result, on=keys)
+
+    if (show):
+      print("Validation Results:")
+      display(test_result)
+      print("Train Results:")
+      display(train_result)
+
+    if (fileName):
+      results.to_csv(r'../{fileName}.csv', index = None, header=True)
+    
+    return train_result, test_result, results
+
+def get_n_numbers(n, start, end):
+    return np.array([math.ceil(x) for x in np.linspace(0,1,n+1) * (end - start) + start])[1:]
