@@ -40,3 +40,15 @@ def preprocess_test(all_samples, verbose=False):
 	if verbose:
 		print(f"Preprocessing {len(all_samples)} samples")
 	return np.array([keypoints_nan_to_zero(preprocess_sample(s)) for s in all_samples])
+
+
+# Normalize with respect to two points (0: Nose, 1: Neck, 2: RShoulder, 5: LShoulder, 8; MidHip )
+def rescale_samples(all_samples, index=[1, 8]):
+	rescale_all_samples = np.copy(all_samples)
+	for ind, sample in enumerate(all_samples):
+		if not ((sample[:, index[0], 2] == 0) & (sample[:, index[1], 2] == 0)).all():
+			rescale_all_samples[ind] /= np.sqrt(
+				((sample[:, index[0], :2] - sample[:, index[1], :2]) ** 2).sum(-1)).mean(0)
+		else:  # quickfix
+			rescale_all_samples[ind] /= sample[:, :, :2].std()
+	return rescale_all_samples
