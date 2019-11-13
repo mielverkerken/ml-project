@@ -52,3 +52,47 @@ def rescale_samples(all_samples, index=[1, 8]):
 		else:  # quickfix
 			rescale_all_samples[ind] /= sample[:, :, :2].std()
 	return rescale_all_samples
+
+
+# Translate all keypoints to mean of body part
+def absolute_to_relative(all_samples):
+	"""
+	Transform points from absolute coordinates to coordinates relative to the mean
+	of the body-part it belongs to.
+
+	Applies normalization w.r.t. the estimated size of the body-part.
+
+	:param all_samples:
+	:return:
+"""
+	# Split keypoints into body-parts
+	body_part_count = 4
+	start_ind = [0, 25, 95, 116, 137]  # pose, face, left-hand, right-hand
+	# Compute mean for each body-part
+	means = []
+	for m in range(len(all_samples)):
+		frame_count = len(all_samples[m])
+		matrix = np.zeros((frame_count, body_part_count, 2))  # 2 = (x, y)
+		for f in range(frame_count):
+			for b in range(body_part_count):
+				points = all_samples[m][f, start_ind[b]:start_ind[b + 1]]
+				matrix[f, b, 0] = sum(points[:, 0]) / len(points)
+				matrix[f, b, 1] = sum(points[:, 1]) / len(points)
+		means.append(matrix)
+		# Transform absolute to relative
+		absolute_to_relative_all_samples = np.copy(all_samples)
+	for m in range(len(all_samples)):
+		frame_count = len(absolute_to_relative_all_samples[m])
+		for f in range(frame_count):
+			for b in range(body_part_count):
+				points = absolute_to_relative_all_samples[m][f, start_ind[b]:start_ind[b + 1]]
+				# Absolute to relative
+				points[:, 0] -= means[m][f, b, 0]
+				points[:, 1] -= means[m][f, b, 1]
+				# Get max dist from mean
+				m_dist = max(np.sqrt(points[:, 0] ** 2 + points[:, 1] ** 2))
+				# Normalize
+				if m_dist > 0:
+					points[:, 0] /= m_dist
+					points[:, 1] /= m_dist
+	return absolute_to_relative_all_samples
