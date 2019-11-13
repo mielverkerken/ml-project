@@ -165,7 +165,7 @@ def results_to_df(CV, tuned_parameters, show=True, fileName=None):
       display(train_result)
 
     if (fileName):
-      results.to_csv(r'../{fileName}.csv', index = None, header=True)
+      results.to_csv(r'../results/{fileName}.csv', index = None, header=True)
     
     return train_result, test_result, results
 
