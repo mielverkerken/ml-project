@@ -631,8 +631,8 @@ def get_time_evolution_directions_uncertain(sample, indices_relevant):  # Simila
 	return np.concatenate([x_features, y_features], axis=0)
 
 
-def generate_feature_matrix_test(all_samples):
-	# constants
+def generate_feature_matrix_test(all_samples, feature_func):
+	# Constants
 	indices_pose = np.arange(0, 25)
 	indices_face = np.arange(25, 95)
 	indices_lh = np.arange(95, 116)
@@ -641,51 +641,21 @@ def generate_feature_matrix_test(all_samples):
 	# Considered keypoints, can be experimented with
 	indices_relevant = np.hstack([indices_lh, indices_rh])
 
-	#   list_features = [moments_frame,
-	#                    average_frame,
-	#                    get_dist_mean,
-	#                    get_dist_mat_features,
-	#                    get_dist_mat_features_uncertain,
-	#                    get_time_evolution_features,
-	#                    get_time_evolution_features_uncertain,
-	#                    get_time_evolution_directions,
-	#                    get_time_evolution_directions_uncertain]
-
-	list_features = [get_dist_mat_features]
-
-	list_cardinal = []  # np.zeros(len(list_features)) # number of features for one idea
-
+	# Number of features
 	train_features = []
-	for f_ind, f in enumerate(list_features):
-		train_features.append([])
-		for ind, sample in tqdm(enumerate(all_samples)):
-			train_features[f_ind].append(f(sample, indices_relevant).flatten())
-		list_cardinal.append(len(train_features[f_ind][0]))
-		train_features[f_ind] = np.vstack(train_features[f_ind])
-		print(f"Dimensions features ({list_features[f_ind].__name__}): \n {train_features[-1].shape}")
-		print(f"Nan check: {np.isnan(train_features[-1]).sum()}")
-	FEATURE_MATRIX = np.hstack(train_features)  # [:]
-	return FEATURE_MATRIX, list_cardinal
+	for ind, sample in tqdm(enumerate(all_samples)):
+		train_features.append(feature_func(sample, indices_relevant).flatten())
+		num_features = len(train_features[0])
+	FEATURE_MATRIX = np.vstack(train_features)
+	print(f"Dimensions features ({feature_func.__name__}): \n {FEATURE_MATRIX.shape}")
+	print(f"Nan check: {np.isnan(FEATURE_MATRIX).sum()}")
+	# = np.hstack(train_features) #[:]
+	return FEATURE_MATRIX, num_features
 
 
-
-def transform_to_panda_dataframe_test(MATRIX, list_cardinal):
-	#   list_features = [moments_frame,
-	#                    average_frame,
-	#                    get_dist_mean,
-	#                    get_dist_mat_features,
-	#                    get_dist_mat_features_uncertain,
-	#                    get_time_evolution_features,
-	#                    get_time_evolution_features_uncertain,
-	#                    get_time_evolution_directions,
-	#                    get_time_evolution_directions_uncertain]
-	list_features = [get_dist_mat_features]
-
+def transform_to_panda_dataframe_test(MATRIX, num_features, feature_func):
 	df = pd.DataFrame()
-	index = 0
-	for fearure_index, feature in enumerate(list_features):
-		for i in range(list_cardinal[fearure_index]):
-			column_name = f"{feature.__name__} {i}"
-			df[column_name] = MATRIX.T[index + i]
-		index = index + list_cardinal[fearure_index]
+	for i in range(num_features):
+		column_name = f"{feature_func.__name__} {i}"
+		df[column_name] = MATRIX.T[i]
 	return df
