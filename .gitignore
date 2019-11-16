@@ -106,3 +106,6 @@ venv.bak/
 # Mac stuff
 .idea
 .DS_Store
+
+# Local notebook
+Notebook/
