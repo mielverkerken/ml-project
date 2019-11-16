@@ -107,5 +107,6 @@ venv.bak/
 .idea
 .DS_Store
 
-# Local notebook
+# Local stuff Arthur
 Notebook/
+features/
