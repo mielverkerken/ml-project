@@ -589,6 +589,48 @@ def average_frame(sample, indices_relevant):
 	return sample[:, indices_relevant, :2].mean(axis=0)
 
 
+def get_dist_mean(sample, indices_relevant, body_relevant=[0, 1, 2, 3]):
+	# Calculate mean of boy part for each frame. Weighted by the their confidence
+	body_part_count = 4
+	start_ind = [0, 25, 95, 116, 137]  # pose, face, left-hand, right-hand
+	matrix = np.zeros((len(sample), body_part_count, 2))  # 2 (x,y)
+	# Compute mean for each body-part
+	for b in range(body_part_count):
+		# If all coordinates are uncertain for the body part frame is worthless
+		mask = (sample[:, start_ind[b]:start_ind[b + 1], 2].sum(axis=1) > 0)
+		if mask.sum() != 0:  # Complete sample has no frames with corresponding body part
+			# matrix = np.zeros((mask.sum(), body_part_count, 2))  # 2 = (x, y)
+			matrix[mask, b, :] = (sample[mask, start_ind[b]:start_ind[b + 1], :2]).sum(axis=1) / len(mask)
+			# matrix = np.delete(matrix, ~mask, 0)  # remove all other frames
+	dist_mean = np.stack([pdist(frame_mean[body_relevant]) for frame_mean in matrix])
+	dist_mean_features = np.stack([dist_mean.sum(0)] + [moment(dist_mean, axis=0, moment=i) for i in np.arange(2, 5)])
+	# dist_mat.sum(0), could be dist_mat.mean(0) but not using the mean works better. Implicit use of the number of
+	# frames, time of a sample
+	return dist_mean_features
+
+
+def get_dist_mean_uncertain(sample, indices_relevant, body_relevant=[0, 1, 2, 3]):
+	# Calculate mean of boy part for each frame. Weighted by the their confidence
+	body_part_count = 4
+	start_ind = [0, 25, 95, 116, 137]  # pose, face, left-hand, right-hand
+	matrix = np.zeros((len(sample), body_part_count, 2))  # 2 (x,y)
+	# Compute mean for each body-part
+	for b in range(body_part_count):
+		# If all coordinates are uncertain for the body part frame is worthless
+		mask = (sample[:, start_ind[b]:start_ind[b + 1], 2].sum(axis=1) > 0)
+		if mask.sum() != 0:  # Complete sample has no frames with corresponding body part
+			# matrix = np.zeros((mask.sum(), body_part_count, 2))  # 2 = (x, y)
+			matrix[mask, b, :] = (sample[mask, start_ind[b]:start_ind[b + 1], 2:] * sample[mask,
+																					start_ind[b]:start_ind[b + 1], :2]).sum(
+				axis=1) / sample[mask, start_ind[b]:start_ind[b + 1], 2:].sum(axis=1)
+			# matrix = np.delete(matrix, ~mask, 0)  # remove all other frames
+	dist_mean = np.stack([pdist(frame_mean[body_relevant]) for frame_mean in matrix])
+	dist_mean_features = np.stack([dist_mean.sum(0)] + [moment(dist_mean, axis=0, moment=i) for i in np.arange(2, 5)])
+	# dist_mat.sum(0), could be dist_mat.mean(0) but not using the mean works better. Implicit use of the number of
+	# frames, time of a sample
+	return dist_mean_features
+
+
 def get_dist_mat_features(sample, indices_relevant):  # Confidence is included by u[2] * v[2]
 	dist_mat = np.stack([pdist(frame[indices_relevant][:, :2]) for frame in sample])
 	dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
