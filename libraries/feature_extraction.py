@@ -581,14 +581,23 @@ def concat_keypoint_means_numpy(X, all_samples):
 
 
 # Test Arthur
+def moments(func):
+	def wrapper(sample, indices_relevant):
+		return np.stack([func(sample, indices_relevant).sum(0)] + [moment(func(sample, indices_relevant), axis=0, moment=i) for i in np.arange(2, 5)])
+	return wrapper
+
+
+@moments
 def moments_frame(sample, indices_relevant):
-	return np.stack([sample[:, indices_relevant, :2].mean(axis=0)] + [moment(sample[:, indices_relevant, :2], axis=0, moment=i) for i in np.arange(2, 5)])
+	return sample[:, indices_relevant, :2]
+	#np.stack([sample[:, indices_relevant, :2].mean(axis=0)] + [moment(sample[:, indices_relevant, :2], axis=0, moment=i) for i in np.arange(2, 5)])
 
 
 def average_frame(sample, indices_relevant):
 	return sample[:, indices_relevant, :2].mean(axis=0)
 
 
+@moments
 def get_dist_mean(sample, indices_relevant, body_relevant=[0, 1, 2, 3]):
 	# Calculate mean of boy part for each frame. Weighted by the their confidence
 	body_part_count = 4
@@ -603,12 +612,13 @@ def get_dist_mean(sample, indices_relevant, body_relevant=[0, 1, 2, 3]):
 			matrix[mask, b, :] = (sample[mask, start_ind[b]:start_ind[b + 1], :2]).sum(axis=1) / len(mask)
 			# matrix = np.delete(matrix, ~mask, 0)  # remove all other frames
 	dist_mean = np.stack([pdist(frame_mean[body_relevant]) for frame_mean in matrix])
-	dist_mean_features = np.stack([dist_mean.sum(0)] + [moment(dist_mean, axis=0, moment=i) for i in np.arange(2, 5)])
+	##dist_mean_features = np.stack([dist_mean.sum(0)] + [moment(dist_mean, axis=0, moment=i) for i in np.arange(2, 5)])
 	# dist_mat.sum(0), could be dist_mat.mean(0) but not using the mean works better. Implicit use of the number of
 	# frames, time of a sample
-	return dist_mean_features
+	return dist_mean
 
 
+@moments
 def get_dist_mean_uncertain(sample, indices_relevant, body_relevant=[0, 1, 2, 3]):
 	# Calculate mean of boy part for each frame. Weighted by the their confidence
 	body_part_count = 4
@@ -625,54 +635,62 @@ def get_dist_mean_uncertain(sample, indices_relevant, body_relevant=[0, 1, 2, 3]
 				axis=1) / sample[mask, start_ind[b]:start_ind[b + 1], 2:].sum(axis=1)
 			# matrix = np.delete(matrix, ~mask, 0)  # remove all other frames
 	dist_mean = np.stack([pdist(frame_mean[body_relevant]) for frame_mean in matrix])
-	dist_mean_features = np.stack([dist_mean.sum(0)] + [moment(dist_mean, axis=0, moment=i) for i in np.arange(2, 5)])
+	##dist_mean_features = np.stack([dist_mean.sum(0)] + [moment(dist_mean, axis=0, moment=i) for i in np.arange(2, 5)])
 	# dist_mat.sum(0), could be dist_mat.mean(0) but not using the mean works better. Implicit use of the number of
 	# frames, time of a sample
-	return dist_mean_features
+	return dist_mean
 
 
+@moments
 def get_dist_mat_features(sample, indices_relevant):  # Confidence is included by u[2] * v[2]
 	dist_mat = np.stack([pdist(frame[indices_relevant][:, :2]) for frame in sample])
-	dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
-	return dist_mat_features
+	##dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
+	return dist_mat
 
 
+@moments
 def get_dist_mat_features_uncertain(sample, indices_relevant):  # Confidence is included by u[2] * v[2]
 	dist_mat = np.stack([squareform(
 		np.sqrt(np.abs(frame[indices_relevant][:, 2][:, None] * frame[indices_relevant][:, 2][None, :])), checks=False) * pdist(
 		frame[indices_relevant][:, :2]) for frame in sample])
-	dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
-	return dist_mat_features
+	##dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
+	return dist_mat
 
 
+@moments
 def get_time_evolution_features(sample, indices_relevant):  # Confidence is included by sample[1:][:, :, 2:]) * sample[:-1][:, :, 2:]
 	dist_mat = np.zeros((len(sample), len(indices_relevant)))
 	if len(sample) != 1:
 		dist_mat = np.sqrt(((sample[1:][:, indices_relevant, :2] - sample[:-1][:, indices_relevant, :2]) ** 2).sum(-1))
-	dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
-	return dist_mat_features
+	## dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
+	return dist_mat
 
 
+@moments
 def get_time_evolution_features_uncertain(sample, indices_relevant):  # Confidence is included by sample[1:][:, :, 2:]) * sample[:-1][:, :, 2:]
 	dist_mat = np.zeros((len(sample), len(indices_relevant)))
 	if len(sample) != 1:
 		dist_mat = np.sqrt((np.abs(sample[1:][:, indices_relevant, 2:] * sample[:-1][:, indices_relevant, 2:]) * (
 				sample[1:][:, indices_relevant, :2] - sample[:-1][:, indices_relevant, :2]) ** 2).sum(-1))
-	dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
-	return dist_mat_features
+	## dist_mat_features = np.stack([dist_mat.sum(0)] + [moment(dist_mat, axis=0, moment=i) for i in np.arange(2, 5)])
+	return dist_mat
 
 
+@moments
 def get_time_evolution_directions(sample, indices_relevant):  # Similar as above but now for x and y distance
 	x_dist = np.zeros((len(sample), len(indices_relevant)))  # difference in x
 	y_dist = np.zeros((len(sample), len(indices_relevant)))  # difference in y
 	if len(sample) != 1:
 		x_dist = np.sqrt((sample[1:][:, indices_relevant, 0] - sample[:-1][:, indices_relevant, 0]) ** 2)
 		y_dist = np.sqrt((sample[1:][:, indices_relevant, 1] - sample[:-1][:, indices_relevant, 1]) ** 2)
-	x_features = np.stack([x_dist.sum(0)] + [moment(x_dist, axis=0, moment=i) for i in np.arange(2, 5)])
-	y_features = np.stack([y_dist.sum(0)] + [moment(y_dist, axis=0, moment=i) for i in np.arange(2, 5)])
-	return np.concatenate([x_features, y_features], axis=0)
+	xy_features = np.hstack((x_dist, y_dist))
+	#x_features = np.stack([x_dist.sum(0)] + [moment(x_dist, axis=0, moment=i) for i in np.arange(2, 5)])
+	#y_features = np.stack([y_dist.sum(0)] + [moment(y_dist, axis=0, moment=i) for i in np.arange(2, 5)])
+	return xy_features
+	#np.concatenate([x_features, y_features], axis=0)
 
 
+@moments
 def get_time_evolution_directions_uncertain(sample, indices_relevant):  # Similar as above but now for x and y distance
 	x_dist = np.zeros((len(sample), len(indices_relevant)))  # difference in x
 	y_dist = np.zeros((len(sample), len(indices_relevant)))  # difference in y
@@ -681,9 +699,11 @@ def get_time_evolution_directions_uncertain(sample, indices_relevant):  # Simila
 				sample[1:][:, indices_relevant, 0] - sample[:-1][:, indices_relevant, 0]) ** 2)
 		y_dist = np.sqrt(np.abs(sample[1:][:, indices_relevant, 2] * sample[:-1][:, indices_relevant, 2]) * (
 				sample[1:][:, indices_relevant, 1] - sample[:-1][:, indices_relevant, 1]) ** 2)
-	x_features = np.stack([x_dist.sum(0)] + [moment(x_dist, axis=0, moment=i) for i in np.arange(2, 5)])
-	y_features = np.stack([y_dist.sum(0)] + [moment(y_dist, axis=0, moment=i) for i in np.arange(2, 5)])
-	return np.concatenate([x_features, y_features], axis=0)
+	xy_features = np.hstack((x_dist, y_dist))
+	#x_features = np.stack([x_dist.sum(0)] + [moment(x_dist, axis=0, moment=i) for i in np.arange(2, 5)])
+	#y_features = np.stack([y_dist.sum(0)] + [moment(y_dist, axis=0, moment=i) for i in np.arange(2, 5)])
+	return xy_features
+	#np.concatenate([x_features, y_features], axis=0)
 
 
 def generate_feature_matrix_test(all_samples, feature_func):
@@ -714,3 +734,30 @@ def transform_to_panda_dataframe_test(MATRIX, num_features, feature_func):
 		column_name = f"{feature_func.__name__} {i}"
 		df[column_name] = MATRIX.T[i]
 	return df
+
+
+def generate_frame_feature(sample, feature_func):
+	# Constants
+	indices_pose = np.arange(0, 25)
+	indices_face = np.arange(25, 95)
+	indices_lh = np.arange(95, 116)
+	indices_rh = np.arange(116, 137)
+
+	# Considered keypoints, can be experimented with
+	indices_relevant = np.hstack([indices_lh, indices_rh])
+
+	dist_mat = np.stack([pdist(frame[indices_relevant][:, :2]) for frame in sample])
+
+	# Number of features
+	train_features = []
+	for ind, sample in enumerate(tqdm(all_samples)):
+		train_features.append(feature_func(sample, indices_relevant).flatten())
+	num_features = len(train_features[0])
+	sample_matrix = np.vstack(train_features)
+	print(f"Dimensions features ({feature_func.__name__}): \n {FEATURE_MATRIX.shape}")
+	# print(f"Nan check: {np.isnan(FEATURE_MATRIX).sum()}")
+	# = np.hstack(train_features) #[:]
+
+	dist_mat = np.stack([pdist(frame[indices_relevant][:, :2]) for frame in sample])
+
+	return sample_matrix, num_features
