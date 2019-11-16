@@ -5,7 +5,7 @@ from tqdm import tqdm_notebook as tqdm
 import pandas as pd
 from scipy.stats import moment
 from scipy.spatial.distance import pdist, cdist, squareform
-
+from functools import wraps
 
 def stats(func):
 	def wrapper(sample):
@@ -582,6 +582,7 @@ def concat_keypoint_means_numpy(X, all_samples):
 
 # Test Arthur
 def moments(func):
+	@wraps(func)
 	def wrapper(sample, indices_relevant):
 		return np.stack([func(sample, indices_relevant).sum(0)] + [moment(func(sample, indices_relevant), axis=0, moment=i) for i in np.arange(2, 5)])
 	return wrapper
