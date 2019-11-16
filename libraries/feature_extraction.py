@@ -703,7 +703,7 @@ def generate_feature_matrix_test(all_samples, feature_func):
 	num_features = len(train_features[0])
 	FEATURE_MATRIX = np.vstack(train_features)
 	print(f"Dimensions features ({feature_func.__name__}): \n {FEATURE_MATRIX.shape}")
-	print(f"Nan check: {np.isnan(FEATURE_MATRIX).sum()}")
+	# print(f"Nan check: {np.isnan(FEATURE_MATRIX).sum()}")
 	# = np.hstack(train_features) #[:]
 	return FEATURE_MATRIX, num_features
 
