@@ -590,7 +590,8 @@ def moments(func):
 
 @moments
 def moments_frame(sample, indices_relevant):
-	return sample[:, indices_relevant, :2]
+	shape_ =  sample[:, indices_relevant, :2].shape
+	return sample[:, indices_relevant, :2].reshape(shape_[0], shape_[1] * shape_[2])
 	#np.stack([sample[:, indices_relevant, :2].mean(axis=0)] + [moment(sample[:, indices_relevant, :2], axis=0, moment=i) for i in np.arange(2, 5)])
 
 
