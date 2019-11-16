@@ -698,7 +698,7 @@ def generate_feature_matrix_test(all_samples, feature_func):
 
 	# Number of features
 	train_features = []
-	for ind, sample in tqdm(enumerate(all_samples)):
+	for ind, sample in enumerate(tqdm(all_samples)):
 		train_features.append(feature_func(sample, indices_relevant).flatten())
 	num_features = len(train_features[0])
 	FEATURE_MATRIX = np.vstack(train_features)
