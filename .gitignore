@@ -110,3 +110,5 @@ venv.bak/
 # Local stuff Arthur
 Notebook/
 features/
+results/
+submissions/
