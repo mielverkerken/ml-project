@@ -15,7 +15,6 @@ from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.model_selection import cross_val_score
-from pactools.grid_search import GridSearchCVProgressBar
 
 from IPython.display import HTML, display
 import pandas as pd
@@ -31,7 +30,7 @@ def tune_pipeline(x_data, y_data, model, scaler, tuned_param,sorted_labels, grou
     
   scoring = {'mapk': H.mapk_scorer, 'topk': H.top3_acc_scorer, 'accuracy': make_scorer(accuracy_score)}
 
-  CV = GridSearchCVProgressBar(pipe, tuned_param, cv=splitter, scoring=scoring, refit="mapk", verbose=1, return_train_score=True, n_jobs=n_jobs)
+  CV = GridSearchCV(pipe, tuned_param, cv=splitter, scoring=scoring, refit="mapk", verbose=1, return_train_score=True, n_jobs=n_jobs)
   CV.fit(x_data, y_data, groups)
 
   mapk_means = CV.cv_results_['mean_test_mapk']
