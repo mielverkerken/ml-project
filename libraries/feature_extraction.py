@@ -1081,7 +1081,7 @@ def get_time_evolution_directions_uncertain(sample, indices_relevant):  # Simila
 	#np.concatenate([x_features, y_features], axis=0)
 
 
-def generate_feature_matrix_test(all_samples, feature_func):
+def generate_feature_matrix_dist(all_samples, feature_func):
 	# Constants
 	indices_pose = np.arange(0, 25)
 	indices_face = np.arange(25, 95)
@@ -1103,7 +1103,7 @@ def generate_feature_matrix_test(all_samples, feature_func):
 	return FEATURE_MATRIX, num_features
 
 
-def transform_to_panda_dataframe_test(MATRIX, num_features, feature_func):
+def transform_to_panda_dataframe_dist(MATRIX, num_features, feature_func):
 	df = pd.DataFrame()
 	for i in range(num_features):
 		column_name = f"{feature_func.__name__} {i}"
@@ -1111,28 +1111,3 @@ def transform_to_panda_dataframe_test(MATRIX, num_features, feature_func):
 	return df
 
 
-def generate_frame_feature(sample, feature_func):
-	# Constants
-	indices_pose = np.arange(0, 25)
-	indices_face = np.arange(25, 95)
-	indices_lh = np.arange(95, 116)
-	indices_rh = np.arange(116, 137)
-
-	# Considered keypoints, can be experimented with
-	indices_relevant = np.hstack([indices_lh, indices_rh])
-
-	dist_mat = np.stack([pdist(frame[indices_relevant][:, :2]) for frame in sample])
-
-	# Number of features
-	train_features = []
-	for ind, sample in enumerate(tqdm(all_samples)):
-		train_features.append(feature_func(sample, indices_relevant).flatten())
-	num_features = len(train_features[0])
-	sample_matrix = np.vstack(train_features)
-	print(f"Dimensions features ({feature_func.__name__}): \n {FEATURE_MATRIX.shape}")
-	# print(f"Nan check: {np.isnan(FEATURE_MATRIX).sum()}")
-	# = np.hstack(train_features) #[:]
-
-	dist_mat = np.stack([pdist(frame[indices_relevant][:, :2]) for frame in sample])
-
-	return sample_matrix, num_features
