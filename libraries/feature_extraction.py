@@ -6,6 +6,7 @@ import pandas as pd
 from scipy.stats import moment
 from scipy.spatial.distance import pdist, cdist, squareform
 from functools import wraps
+import pdb
 
 def stats(func):
 	def wrapper(sample):
@@ -139,9 +140,46 @@ def get_hand_movement_raw(sample):
 	return (dx_L, dx_R, dy_L, dy_R)
 
 
+def get_hand_movement_raw_uncertain(sample):
+	baricenter_L = []
+	baricenter_R = []
+	for frame in sample:
+		bcl = frame[hand_left_offset:hand_left_offset + hand_left_len, :]
+		bcl_uncertain = bcl[:, 2:][bcl[:, 0] == bcl[:, 0]]
+		bcl = bcl[:, 0:2]
+		bcl = bcl[bcl[:, 0] == bcl[:, 0]]
+
+		if len(bcl) == 0:
+			bcl = np.array([np.nan] * 2)
+		else:
+			bcl = (bcl * bcl_uncertain).sum(axis=0) / bcl_uncertain.sum(axis=0)
+		baricenter_L.append(bcl)
+
+		bcr = frame[hand_right_offset:hand_right_offset + hand_right_len, :]
+		bcr_uncertain = bcr[:, 2:][bcr[:, 0] == bcr[:, 0]]
+		bcr = bcr[:, 0:2]
+		bcr = bcr[bcr[:, 0] == bcr[:, 0]]
+
+		if len(bcr) == 0:
+			bcr = np.array([np.nan] * 2)
+		else:
+			bcr = (bcr * bcr_uncertain).sum(axis=0) / bcr_uncertain.sum(axis=0)
+		baricenter_R.append(bcr)
+
+	dx_L, dy_L = np.diff(np.array(baricenter_L).T)
+	dx_R, dy_R = np.diff(np.array(baricenter_R).T)
+
+	return (dx_L, dx_R, dy_L, dy_R)
+
+
 @stats
 def get_hand_movement(sample):
 	return get_hand_movement_raw(sample)
+
+
+@stats
+def get_hand_movement_uncertain(sample):
+	return get_hand_movement_raw_uncertain(sample)
 
 
 def arclength(x):
@@ -193,6 +231,29 @@ def shoulder_wrist_y(sample):
 
 
 @stats
+def shoulder_wrist_y_uncertain(sample):
+	R = []
+	L = []
+	for frame in sample:
+		body, _, _, _ = get_frame_parts(frame)
+		c_shoulder = body[[1, 2, 5], 1]
+		c_shoulder_uncertain = body[[1, 2, 5], 2][c_shoulder == c_shoulder]
+		c_shoulder = c_shoulder[c_shoulder == c_shoulder]
+		if len(c_shoulder) == 0:
+			c_shoulder = float('nan')
+		else:
+			c_shoulder = (c_shoulder_uncertain * c_shoulder).sum(axis=0) / c_shoulder_uncertain.sum(axis=0)
+		r_wrist = body[4, 2] * body[4, 1]
+		l_wrist = body[7, 2] * body[7, 1]
+		d_r = c_shoulder - r_wrist
+		d_l = c_shoulder - l_wrist
+		R.append(d_r)
+		L.append(d_l)
+
+	return np.array(L), np.array(R)
+
+
+@stats
 def head_hand(sample):
 	R = []
 	L = []
@@ -224,6 +285,55 @@ def head_hand(sample):
 			d_l = np.nan
 		else:
 			l_hand = l_hand.mean(axis=0)
+			d_l = dist(head, l_hand)
+
+		R.append(d_r)
+		L.append(d_l)
+
+	return np.array(L), np.array(R)
+
+
+@stats
+def head_hand_uncertain(sample):
+	R = []
+	L = []
+	head = np.zeros((len(sample), 2))
+	for i, frame in enumerate(sample):
+		_, f_head, _, _ = get_frame_parts(frame)
+		f_head_uncertain = f_head[:, 2:][f_head[:, 0] == f_head[:, 0]]
+		f_head = f_head[:, 0:2]
+		f_head = f_head[f_head[:, 0] == f_head[:, 0]]
+
+		if len(f_head):
+			f_head = (f_head_uncertain * f_head).sum(axis=0) / f_head_uncertain.sum(axis=0)
+			head[i] = f_head
+
+	head = head[head[:, 0] == head[:, 0]]
+	if len(head):
+		head = np.mean(head)
+	else:
+		return np.array([[float('nan')], [float('nan')]])
+
+	for frame in sample:
+		_, _, r_hand, l_hand = get_frame_parts(frame)
+		r_hand_uncertain = r_hand[:, 2:][r_hand[:, 0] == r_hand[:, 0]]
+		r_hand = r_hand[:, 0:2]
+		r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
+
+		l_hand_uncertain = l_hand[:, 2:][l_hand[:, 0] == l_hand[:, 0]]
+		l_hand = l_hand[:, 0:2]
+		l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
+
+		if len(r_hand) == 0:
+			d_r = np.nan
+		else:
+			r_hand = (r_hand_uncertain * r_hand).sum(axis=0) / r_hand_uncertain.mean(axis=0)
+			d_r = dist(head, r_hand)
+
+		if len(l_hand) == 0:
+			d_l = np.nan
+		else:
+			(l_hand_uncertain * l_hand).sum(axis=0) / l_hand_uncertain.mean(axis=0)
 			d_l = dist(head, l_hand)
 
 		R.append(d_r)
@@ -288,6 +398,59 @@ def chin_thumb(sample):
 		l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
 		if len(l_hand):
 			l_hand = l_hand.mean(axis=0)
+		else:
+			l_hand = np.nan
+		d_r = dist(chin, r_hand)
+		d_l = dist(chin, l_hand)
+		R.append(d_r)
+		L.append(d_l)
+
+	return np.array(L), np.array(R)
+
+
+@stats
+def chin_thumb_uncertain(sample):
+	R = []
+	L = []
+	chin = np.zeros((len(sample), 2))
+	for i, frame in enumerate(sample):
+		_, f_head, _, _ = get_frame_parts(frame)
+
+		f_head = f_head[7:10, :]
+		f_head_uncertain = f_head[:, 2:][f_head[:, 0] == f_head[:, 0]]
+		f_head = f_head[:, 0:2]
+		f_head = f_head[f_head[:, 0] == f_head[:, 0]]
+
+		if len(f_head):
+			f_head = (f_head_uncertain * f_head).sum(axis=0) / f_head_uncertain.sum(axis=0)
+			chin[i] = f_head
+
+	chin = chin[chin[:, 0] == chin[:, 0]]
+	if len(chin):
+		chin = np.mean(chin)
+	else:
+		return np.array([[float('nan')], [float('nan')]])
+
+	for frame in sample:
+		_, _, r_hand, l_hand = get_frame_parts(frame)
+
+		r_hand = r_hand[2:5, :]
+		r_hand_uncertain = r_hand[:, 2:][r_hand[:, 0] == r_hand[:, 0]]
+		r_hand = r_hand[:, 0:2]
+		r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
+
+		if len(r_hand):
+			r_hand = (r_hand_uncertain * r_hand).sum(axis=0) / r_hand_uncertain.mean(axis=0)
+		else:
+			r_hand = np.nan
+
+		l_hand = l_hand[2:5, :]
+		l_hand_uncertain = l_hand[:, 2:][l_hand[:, 0] == l_hand[:, 0]]
+		l_hand = l_hand[:, 0:2]
+		l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
+
+		if len(l_hand):
+			l_hand = (l_hand_uncertain * l_hand).sum(axis=0) / l_hand_uncertain.mean(axis=0)
 		else:
 			l_hand = np.nan
 		d_r = dist(chin, r_hand)
@@ -372,6 +535,56 @@ def mouth_index(sample):
 
 	return np.array(L), np.array(R)
 
+@stats
+def mouth_index_uncertain(sample):
+	R = []
+	L = []
+	mouth = np.zeros((len(sample), 2))
+	for i, frame in enumerate(sample):
+		# pdb.set_trace()
+		_, f_head, _, _ = get_frame_parts(frame)
+		f_head = f_head[48:68, :]
+		f_head_uncertain = f_head[:, 2:][f_head[:, 0] == f_head[:, 0]]
+		f_head = f_head[:, 0:2]
+		f_head = f_head[f_head[:, 0] == f_head[:, 0]]
+
+		if len(f_head):
+			f_head = (f_head_uncertain * f_head).sum(axis=0) / f_head_uncertain.sum(axis=0)
+			mouth[i] = f_head
+
+	mouth = mouth[mouth[:, 0] == mouth[:, 0]]
+	if len(mouth):
+		mouth = np.mean(mouth)
+	else:
+		return np.array([[float('nan')], [float('nan')]])
+
+	for frame in sample:
+		_, _, r_hand, l_hand = get_frame_parts(frame)
+		r_hand = r_hand[6:9, :]
+		r_hand_uncertain = r_hand[:, 2:][r_hand[:, 0] == r_hand[:, 0]]
+		r_hand = r_hand[:, 0:2]
+		r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
+		if len(r_hand):
+			r_hand = (r_hand_uncertain * r_hand).sum(axis=0) / r_hand_uncertain.mean(axis=0)
+		else:
+			r_hand = np.nan
+
+		l_hand = l_hand[6:9, :]
+		l_hand_uncertain = l_hand[:, 2:][l_hand[:, 0] == l_hand[:, 0]]
+		l_hand = l_hand[:, 0:2]
+		l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
+		if len(l_hand):
+			l_hand = (l_hand_uncertain * l_hand).sum(axis=0) / l_hand_uncertain.mean(axis=0)
+		else:
+			l_hand = np.nan
+
+		d_r = dist(mouth, r_hand)
+		d_l = dist(mouth, l_hand)
+		R.append(d_r)
+		L.append(d_l)
+
+	return np.array(L), np.array(R)
+
 
 @stats
 def thumb_pink(sample):
@@ -416,6 +629,60 @@ def thumb_pink(sample):
 
 
 @stats
+def thumb_pink_uncertain(sample):
+	R = []
+	L = []
+	for frame in sample:
+		_, _, r_hand, l_hand = get_frame_parts(frame)
+
+		r_hand1 = r_hand[2:5, :]
+		r_hand1_uncertain = r_hand1[:, 2:][r_hand1[:, 0] == r_hand1[:, 0]]
+		r_hand1 = r_hand1[:, 0:2]
+		r_hand1 = r_hand1[r_hand1[:, 0] == r_hand1[:, 0]]
+
+		if len(r_hand1):
+			r_hand1 = (r_hand1_uncertain * r_hand1).sum(axis=0) / r_hand1_uncertain.sum(axis=0)
+		else:
+			r_hand1 = np.nan
+
+		l_hand1 = l_hand[2:5, :]
+		l_hand1_uncertain = l_hand1[:, 2:][l_hand1[:, 0] == l_hand1[:, 0]]
+		l_hand1 = l_hand1[:, 0:2]
+		l_hand1 = l_hand1[l_hand1[:, 0] == l_hand1[:, 0]]
+
+		if len(l_hand1):
+			l_hand1 = (l_hand1_uncertain * l_hand1).sum(axis=0) / l_hand1_uncertain.sum(axis=0)
+		else:
+			l_hand1 = np.nan
+
+		r_hand2 = r_hand[18:21, :]
+		r_hand2_uncertain = r_hand2[:, 2:][r_hand2[:, 0] == r_hand2[:, 0]]
+		r_hand2 = r_hand2[:, 0:2]
+		r_hand2 = r_hand2[r_hand2[:, 0] == r_hand2[:, 0]]
+
+		if len(r_hand2):
+			r_hand2 = (r_hand2 * r_hand2_uncertain).sum(axis=0) / r_hand2_uncertain.sum(axis=0)
+		else:
+			r_hand2 = np.nan
+
+		l_hand2 = l_hand[18:21, :]
+		l_hand2_uncertain = l_hand2[:, 2:][l_hand2[:, 0] == l_hand2[:, 0]]
+		l_hand2 = l_hand2[:, 0:2]
+		l_hand2 = l_hand2[l_hand2[:, 0] == l_hand2[:, 0]]
+
+		if len(l_hand2):
+			l_hand2 = (l_hand2_uncertain * l_hand2).sum(axis=0) / l_hand2_uncertain.sum(axis=0)
+		else:
+			l_hand2 = np.nan
+
+		d_r = dist(r_hand1, r_hand2)
+		d_l = dist(l_hand1, l_hand2)
+		R.append(d_r)
+		L.append(d_l)
+	return np.array(L), np.array(R)
+
+
+@stats
 def index_index(sample):
 	out = []
 	for frame in sample:
@@ -438,12 +705,55 @@ def index_index(sample):
 
 
 @stats
+def index_index_uncertain(sample):
+	out = []
+	for frame in sample:
+		_, _, r_hand, l_hand = get_frame_parts(frame)
+
+		r_hand = r_hand[6:9, :]
+		r_hand_uncertain = r_hand[:, 2:][r_hand[:, 0] == r_hand[:, 0]]
+		r_hand = r_hand[:, 0:2]
+		r_hand = r_hand[r_hand[:, 0] == r_hand[:, 0]]
+
+		if len(r_hand):
+			r_hand = (r_hand_uncertain * r_hand).sum(axis=0) / r_hand_uncertain.sum(axis=0)
+		else:
+			r_hand = np.nan
+
+		l_hand = l_hand[6:9, :]
+		l_hand_uncertain = l_hand[:, 2:][l_hand[:, 0] == l_hand[:, 0]]
+		l_hand = l_hand[:, 0:2]
+		l_hand = l_hand[l_hand[:, 0] == l_hand[:, 0]]
+
+		if len(l_hand):
+			l_hand = (l_hand_uncertain * l_hand).sum(axis=0) / l_hand_uncertain.sum(axis=0)
+		else:
+			l_hand = np.nan
+		d = dist(r_hand, l_hand)
+		out.append(d)
+	return [np.array(out)]
+
+
+@stats
 def wrist_wrist_x(sample):
 	out = []
 	for frame in sample:
 		body, _, _, _ = get_frame_parts(frame)
 		r_wrist = body[4, 0]
 		l_wrist = body[7, 0]
+		d = l_wrist - r_wrist
+		out.append(d)
+
+	return [np.array(out)]
+
+
+@stats
+def wrist_wrist_x_uncertain(sample):
+	out = []
+	for frame in sample:
+		body, _, _, _ = get_frame_parts(frame)
+		r_wrist = body[4, 2] * body[4, 0]
+		l_wrist = body[7, 0] * body[7, 0]
 		d = l_wrist - r_wrist
 		out.append(d)
 
@@ -539,6 +849,54 @@ def generate_feature_matrix(all_samples):
 
 		# expect 6 features for distance between upper and lower lips
 		sample_row.extend(mouth_distance(sample))
+
+		# transform to numpy array
+		FEATURE_MATRIX[i] = np.array(sample_row)
+	return FEATURE_MATRIX
+
+
+def generate_feature_matrix_uncertain(all_samples):
+	NUM_SAMPLES = len(all_samples)
+
+	# regular statistical features                         #singular features
+	COLUMNS = (NUM_FEATURES - NUM_FEATURES_WITHOUT_STATS) * NUM_STATS + NUM_FEATURES_WITHOUT_STATS
+	COLUMNS = 24 + 12 + 12 + 12 + 12 + 12 + 6 + 6 + 6
+	# COLUMNS = (NUM_FEATURES - NUM_FEATURES_WITHOUT_STATS) * NUM_STATS + NUM_FEATURES_WITHOUT_STATS + 6 + 12
+
+	FEATURE_MATRIX = np.zeros((NUM_SAMPLES, COLUMNS))
+
+	for i, sample in enumerate(tqdm(all_samples)):
+		sample_row = []
+
+		# expect 24 features for the hand movement
+		if (len(sample) > 1):
+			sample_row.extend(get_hand_movement_uncertain(sample))  # Works
+		else:
+			sample_row.extend([0] * 24)
+
+		# expect 12 features for shoulder wrist
+		sample_row.extend(shoulder_wrist_y_uncertain(sample))  # Works
+
+		# expect 12 features for head hand
+		sample_row.extend(head_hand_uncertain(sample))  # Works
+
+		# expect 12 features for chin thumb
+		sample_row.extend(chin_thumb_uncertain(sample))  # Works
+
+		# expect 12 features for mouth index
+		sample_row.extend(mouth_index_uncertain(sample))  # Works
+
+		# expect 12 features for thumb pink
+		sample_row.extend(thumb_pink_uncertain(sample))  # Works
+
+		# expect 6 features for index index
+		sample_row.extend(index_index_uncertain(sample))  # Works
+
+		# expect 6 features for index index
+		sample_row.extend(wrist_wrist_x_uncertain(sample))  # Works
+
+		# expect 6 features for distance between upper and lower lips
+		sample_row.extend(mouth_distance_uncertain(sample))  # Works
 
 		# transform to numpy array
 		FEATURE_MATRIX[i] = np.array(sample_row)
