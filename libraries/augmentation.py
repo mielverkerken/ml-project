@@ -58,5 +58,17 @@ def skip_fram_agmentation(all_samples, all_labels, all_persons, min_frames=8, ma
       count += 1
   return aug_samples, aug_labels, aug_persons
     
-  
-  
+from util.constants import *
+def add_noise_hands(all_samples, all_labels, all_persons, snr = 100):
+    np.random.seed(0)
+    start_idx_hand = hand_left_offset
+    end_idx_hand = hand_left_offset + hand_left_len + hand_right_len
+    n_hand_keypoints = end_idx_hand - start_idx_hand
+    augmented_samples = []
+    for sample in all_samples:
+        augmented_sample = sample.copy()
+        augmented_sample[:, start_idx_hand:end_idx_hand, x_index:y_index+1] += \
+            np.random.multivariate_normal(np.zeros(2), np.identity(2), (len(sample), n_hand_keypoints)) / snr
+        augmented_samples.append(augmented_sample)
+    return np.array(augmented_samples), all_labels, all_persons
+    

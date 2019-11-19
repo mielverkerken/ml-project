@@ -947,8 +947,6 @@ def concat_keypoint_means(dataframe, all_samples):
 
 def concat_keypoint_means_numpy(X, all_samples):
 	keypoint_means, keypoint_labels = extract_keypoint_means(all_samples)
-	total_features = keypoint_means.shape[1]
-	df = pd.DataFrame(data=keypoint_means, columns=keypoint_labels)
 	X_new = np.concatenate((keypoint_means, X), axis=1)
 	return X_new
 
