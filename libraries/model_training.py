@@ -103,7 +103,7 @@ def feature_election(x_data, y_data, CV, groups, feature_range, plot=True):
     
     return f_scores, i, opt_features   
 
-def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, feature_selection, imputer, fileName, groups=None, n_jobs=-1,  k=5, verbose=True, confusion_matrix=True):
+def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, feature_selection, imputer, fileName, groups=None, n_jobs=-1,  k=5, verbose=True, confusion_matrix=True, learning_curve=False):
     pipe = Pipeline([
       ("scale", scaler),
       ("imputer", imputer),
@@ -125,6 +125,9 @@ def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, f
 
     if confusion_matrix:
       plot_confusion_matrix(x_data, y_data, groups, CV, sorted_labels, k)
+
+    if learning_curve:
+        plot_learning_curve(x_data, y_data, groups, CV, k=k)
 
     return CV 
 
