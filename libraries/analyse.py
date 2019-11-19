@@ -72,14 +72,16 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
 
 def plot_learning_curve(X, y, group, cv, k=5, n_original=False):
-    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.3, 1.0, 8), cv=StratifiedGroupKFold(k, n_original), scoring=H.mapk_scorer)
+    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.3, 1.0, 8), cv=StratifiedGroupKFold(k, n_original), scoring=H.mapk_scorer, verbose=10, n_jobs=-1)
     plt.figure()
-    plt.plot(train_sizes, train_scores, 'g-', label="train")
-    plt.plot(train_sizes, valid_scores, 'r-', label="validate")
+    plt.plot(train_sizes, np.mean(train_scores, axis=1), 'g-', label="train")
+    plt.plot(train_sizes, np.mean(valid_scores, axis=1), 'r-', label="validate")
+    print(f"mean validation scores in learning curve: {np.mean(valid_scores, axis=1)}")
     plt.xlabel("Training examples (%)")
     plt.ylabel("map@3")
     plt.legend()
     plt.show()
+    return train_sizes, train_scores, valid_scores
 
 def top_n_logistic_model_coefficients(CV, X):
     for i in range(CV.best_estimator_['model'].coef_.shape[0]):
