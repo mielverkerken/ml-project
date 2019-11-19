@@ -71,8 +71,8 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
 
-def plot_learning_curve(X, y, group, cv, k=5):
-    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.3, 1.0, 8), cv=StratifiedGroupKFold(k), scoring=H.mapk_scorer)
+def plot_learning_curve(X, y, group, cv, k=5, n_original=False):
+    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.3, 1.0, 8), cv=StratifiedGroupKFold(k, n_original), scoring=H.mapk_scorer)
     plt.figure()
     plt.plot(train_sizes, train_scores, 'g-', label="train")
     plt.plot(train_sizes, valid_scores, 'r-', label="validate")

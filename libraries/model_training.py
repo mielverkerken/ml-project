@@ -103,7 +103,7 @@ def feature_election(x_data, y_data, CV, groups, feature_range, plot=True):
     
     return f_scores, i, opt_features   
 
-def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, feature_selection, imputer, fileName, groups=None, n_jobs=-1,  k=5, verbose=True, confusion_matrix=True, learning_curve=False):
+def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, feature_selection, imputer, fileName, groups=None, n_jobs=-1,  k=5, n_original=False, verbose=True, confusion_matrix=True, learning_curve=False):
     pipe = Pipeline([
       ("scale", scaler),
       ("imputer", imputer),
@@ -111,7 +111,7 @@ def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, f
       ("model", model)
     ], verbose=False)
 
-    splitter = StratifiedGroupKFold(k)
+    splitter = StratifiedGroupKFold(k, n_original)
       
     scoring = {'mapk': H.mapk_scorer, 'topk': H.top3_acc_scorer, 'accuracy': make_scorer(accuracy_score)}
 
