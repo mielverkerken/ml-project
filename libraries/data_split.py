@@ -6,8 +6,9 @@ import pandas as pd
 from collections import Counter, defaultdict
 
 class StratifiedGroupKFold:
-    def __init__(self, n_splits=5):
-        self.n_splits= int(n_splits)
+    def __init__(self, n_splits=5, n_original=False):
+        self.n_splits = int(n_splits)
+        self.n_original = int(n_original)
 
     def get_n_splits(self, X=None, y=None, groups=None):
         return self.n_splits
@@ -53,6 +54,6 @@ class StratifiedGroupKFold:
             test_groups = groups_per_fold[i]
 
             train_indices = [i for i, g in enumerate(groups) if g in train_groups]
-            test_indices = [i for i, g in enumerate(groups) if g in test_groups]
+            test_indices = [i for i, g in enumerate(groups) if g in test_groups and (not self.n_original or i < self.n_original)]
 
             yield train_indices, test_indices
