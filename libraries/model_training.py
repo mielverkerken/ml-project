@@ -127,7 +127,7 @@ def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, f
       plot_confusion_matrix(x_data, y_data, groups, CV, sorted_labels, k)
 
     if learning_curve:
-        plot_learning_curve(x_data, y_data, groups, CV, k=k, n_original)
+        plot_learning_curve(x_data, y_data, groups, CV, k=k, n_original=n_original)
 
     return CV 
 
