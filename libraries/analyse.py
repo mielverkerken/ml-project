@@ -72,13 +72,30 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
 
 def plot_learning_curve(X, y, group, cv, k=5, n_original=False):
-    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.3, 1.0, 8), cv=StratifiedGroupKFold(k, n_original), scoring=H.mapk_scorer, verbose=10, n_jobs=-1)
+    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.1, 1.0, 5), cv=StratifiedGroupKFold(k, n_original), verbose=10, n_jobs=-1)
+    # scoring=H.mapk_scorer
+
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(valid_scores, axis=1)
+    test_scores_std = np.std(valid_scores, axis=1)
+
     plt.figure()
-    plt.plot(train_sizes, np.mean(train_scores, axis=1), 'g-', label="train")
-    plt.plot(train_sizes, np.mean(valid_scores, axis=1), 'r-', label="validate")
+    plt.grid()
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.1,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label="Cross-validation score")
+
     print(f"mean validation scores in learning curve: {np.mean(valid_scores, axis=1)}")
     plt.xlabel("Training examples (%)")
-    plt.ylabel("map@3")
+    # plt.ylabel("map@3")
+    plt.ylabel("accuracy")
     plt.legend()
     plt.show()
     return train_sizes, train_scores, valid_scores
