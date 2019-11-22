@@ -76,9 +76,7 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
 def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new}, n_original=False):
     colormap_train = cm.Reds(np.flip(np.linspace(0.7, 1, len(scoring))))
     colormap_test = cm.Greens(np.flip(np.linspace(0.7, 1, len(scoring))))
-    # fig, ax =
-    # plt.figure()
-    fig, ax = plt.subplots()
+    plt.figure()
     for ind, score_func in enumerate(scoring):
         train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y,
                                                                  groups=group,
