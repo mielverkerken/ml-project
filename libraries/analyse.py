@@ -93,7 +93,7 @@ def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new
                          color=colormap_train[ind])
         plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
                          test_scores_mean + test_scores_std, alpha=0.1, color=colormap_test[ind])
-        plt.plot(train_sizes, train_scores_mean, 'o--', color=colormap_train[ind],
+        plt.plot(train_sizes, train_scores_mean, 'o-', color=colormap_train[ind],
                  label=f"Training score {score_func}")
         plt.plot(train_sizes, test_scores_mean, 'o-', color=colormap_test[ind],
                  label=f"Cross-validation score {score_func}")
