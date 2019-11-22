@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from libraries.data_split import StratifiedGroupKFold
 from sklearn.model_selection import learning_curve
 import util.helpers as H
+from sklearn.metrics import make_scorer
+import matplotlib.cm as cm
 
 def _plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
@@ -71,34 +73,40 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
 
-def plot_learning_curve(X, y, group, cv, k=5, n_original=False):
-    train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y, groups=group, train_sizes=np.linspace(0.1, 1.0, 5), cv=StratifiedGroupKFold(k, n_original), verbose=10, n_jobs=-1)
-    # scoring=H.mapk_scorer
-
-    train_scores_mean = np.mean(train_scores, axis=1)
-    train_scores_std = np.std(train_scores, axis=1)
-    test_scores_mean = np.mean(valid_scores, axis=1)
-    test_scores_std = np.std(valid_scores, axis=1)
-
+def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new}, n_original=False):
+    colormap_train = cm.Reds(np.linspace(0.5, 1, len(scoring)))
+    colormap_test = cm.Greens(np.linspace(0.5, 1, len(scoring)))
     plt.figure()
-    plt.grid()
-    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
-                     train_scores_mean + train_scores_std, alpha=0.1,
-                     color="r")
-    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
-    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-             label="Training score")
-    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-             label="Cross-validation score")
+    for ind, score_func in enumerate(scoring):
+        # verbose = 10
+        train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y,
+                                                                 groups=group,
+                                                                 train_sizes=np.linspace(0.1, 1.0, 5),
+                                                                 cv=StratifiedGroupKFold(k, n_original),
+                                                                 verbose=False, scoring=scoring[score_func],
+                                                                 n_jobs=-1)
+        train_scores_mean = np.mean(train_scores, axis=1)
+        train_scores_std = np.std(train_scores, axis=1)
+        test_scores_mean = np.mean(valid_scores, axis=1)
+        test_scores_std = np.std(valid_scores, axis=1)
+        plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                         train_scores_mean + train_scores_std, alpha=0.1,
+                         color=colormap_train[ind])
+        plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1, color=colormap_test[ind])
+        plt.plot(train_sizes, train_scores_mean, 'o--', color=colormap_train[ind],
+                 label=f"Training score {score_func}")
+        plt.plot(train_sizes, test_scores_mean, 'o-', color=colormap_test[ind],
+                 label=f"Cross-validation score {score_func}")
+        print(f"mean validation scores {score_func} in learning curve: {np.mean(valid_scores, axis=1)}")
 
-    print(f"mean validation scores in learning curve: {np.mean(valid_scores, axis=1)}")
+    plt.grid()
     plt.xlabel("Training examples (%)")
     # plt.ylabel("map@3")
-    plt.ylabel("accuracy")
+    plt.ylabel("Precision")
     plt.legend()
     plt.show()
-    return train_sizes, train_scores, valid_scores
+    # return train_sizes, train_scores, valid_scores
 
 def top_n_logistic_model_coefficients(CV, X):
     for i in range(CV.best_estimator_['model'].coef_.shape[0]):
