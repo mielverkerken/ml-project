@@ -101,7 +101,7 @@ def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new
         print(f"mean validation scores {score_func} in learning curve: {np.mean(valid_scores, axis=1)}")
 
     plt.grid()
-    plt.xlabel("Training examples (%)")
+    plt.xlabel("Training examples")
     # plt.ylabel("map@3")
     plt.ylabel("Precision")
     plt.legend()
