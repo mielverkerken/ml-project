@@ -36,14 +36,33 @@ def mapk_scorer(estimator, X, y):
     probas = estimator.predict_proba(X)
     return mapk(probas, y)
 
+def mapk_scorer_new(estimator, X, y):
+    prob = estimator.predict_proba(X)
+    class_mapper = {k:v for k,v in enumerate(estimator.classes_)}
+    sort = np.flip(np.argsort(prob, axis=1), axis=1)
+    sort = np.array([[class_mapper[label] for label in row] for row in sort])
+    score = (sort[:,0]==y).mean()
+    if prob.shape[1]>1: score+=1/2*(sort[:,1]==y).mean()
+    if prob.shape[1]>2: score+=1/3*(sort[:,2]==y).mean()
+    return score
+
 def top3_acc_scorer(estimator, X, y):
     probas = estimator.predict_proba(X)
     return top3_accuracy(probas, y)
 
+def top3_acc_scorer_new(estimator, X, y):
+    prob = estimator.predict_proba(X)
+    class_mapper = {k:v for k,v in enumerate(estimator.classes_)}
+    sort = np.flip(np.argsort(prob, axis=1), axis=1)
+    sort = np.array([[class_mapper[label] for label in row] for row in sort])
+    score = (sort[:,0]==y).mean()
+    if prob.shape[1]>1: score+=(sort[:,1]==y).mean()
+    if prob.shape[1]>2: score+=(sort[:,2]==y).mean()
+    return score
+
 def get_ordered_predictions(probabilities):
     """For every sample in X, return a list of predictions.
     Per sample, the predictions are ordered via their corresponding (descending) probability.
-
     :param probabilities predicted by your classifier.
     :param X: A numpy array of shape `(n_samples, n_features)`.
     :returns: A numpy array of shape `(n_samples, n_classes)`.
@@ -79,7 +98,6 @@ def apk(actual, predicted, k=3):
             score += num_hits / (i+1.0)
 
     return score
-
 
 def mapk(probabilities, actual, k=3):
     """
