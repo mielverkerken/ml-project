@@ -74,11 +74,12 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
 
 def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new}, n_original=False):
-    colormap_train = cm.Reds(np.linspace(0.5, 1, len(scoring)))
-    colormap_test = cm.Greens(np.linspace(0.5, 1, len(scoring)))
-    plt.figure()
+    colormap_train = cm.Reds(np.flip(np.linspace(0.7, 1, len(scoring))))
+    colormap_test = cm.Greens(np.flip(np.linspace(0.7, 1, len(scoring))))
+    # fig, ax =
+    # plt.figure()
+    fig, ax = plt.subplots()
     for ind, score_func in enumerate(scoring):
-        # verbose = 10
         train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y,
                                                                  groups=group,
                                                                  train_sizes=np.linspace(0.1, 1.0, 5),
@@ -100,11 +101,13 @@ def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new
                  label=f"Cross-validation score {score_func}")
         print(f"mean validation scores {score_func} in learning curve: {np.mean(valid_scores, axis=1)}")
 
+    # Reordering legend
+    handles, labels = plt.gca().get_legend_handles_labels()
+    plt.gca().legend(handles=handles[0::2]+handles[1::2])
+
     plt.grid()
     plt.xlabel("Training examples")
-    # plt.ylabel("map@3")
     plt.ylabel("Precision")
-    plt.legend()
     plt.show()
     # return train_sizes, train_scores, valid_scores
 
