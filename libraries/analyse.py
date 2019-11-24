@@ -24,7 +24,7 @@ def _plot_confusion_matrix(y_true, y_pred, classes,
 
     # Compute confusion matrix
     cm = confusion_matrix(y_true, y_pred)
-    if print:
+    if print_cm:
         print(cm)
     # Only use the labels that appear in the data
     classes = classes[unique_labels(y_true, y_pred)]
@@ -60,7 +60,9 @@ def _plot_confusion_matrix(y_true, y_pred, classes,
                     ha="center", va="center",
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
-    return ax
+    plt.savefig('ConfusionMartrix.png', bbox_inches='tight')
+    # fig.show()
+    # return ax
 
 def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
     splitter = StratifiedGroupKFold(k)
@@ -71,7 +73,7 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
         y_pred = cv.best_estimator_.predict(x_test)
         y_tot_true = np.concatenate((y_tot_true, y_test), axis=0)
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
-    _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print)
+    _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=True)
 
 def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new}, n_original=False):
     colormap_train = cm.Reds(np.flip(np.linspace(0.7, 1, len(scoring))))
@@ -106,7 +108,8 @@ def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new
     plt.grid()
     plt.xlabel("Training examples")
     plt.ylabel("Precision")
-    plt.show()
+    plt.savefig('LearningCurve.png', bbox_inches='tight')
+    # fig.show()
     # return train_sizes, train_scores, valid_scores
 
 def top_n_logistic_model_coefficients(CV, X):
