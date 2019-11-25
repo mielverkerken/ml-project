@@ -62,10 +62,9 @@ def _plot_confusion_matrix(y_true, y_pred, classes,
     fig.tight_layout()
     plt.savefig('ConfusionMartrix.png', bbox_inches='tight')
     # fig.show()
-    # return ax
 
-def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
-    splitter = StratifiedGroupKFold(k)
+def plot_confusion_matrix(X, Y, group, cv, labels, print_cm=True, splitter=StratifiedGroupKFold(5)):
+
     y_tot_true, y_tot_pred = np.empty(0, dtype=int), np.empty(0, dtype=int)
     for train_index, test_index in splitter.split(X, Y, group):
         x_train, x_test, y_train, y_test = X[train_index], X[test_index], Y[train_index], Y[test_index]
@@ -73,19 +72,20 @@ def plot_confusion_matrix(X, Y, group, cv, labels, k=5, print=True):
         y_pred = cv.best_estimator_.predict(x_test)
         y_tot_true = np.concatenate((y_tot_true, y_test), axis=0)
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
-    _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=True)
+    _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print_cm)
 
-def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new}, n_original=False):
+def plot_learning_curve(X, y, group, cv, scoring={'mapk': H.mapk_scorer_new}, title=None, splitter=StratifiedGroupKFold(5)):
     colormap_train = cm.Reds(np.flip(np.linspace(0.7, 1, len(scoring))))
     colormap_test = cm.Greens(np.flip(np.linspace(0.7, 1, len(scoring))))
+
     plt.figure()
     for ind, score_func in enumerate(scoring):
         train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y,
                                                                  groups=group,
                                                                  train_sizes=np.linspace(0.1, 1.0, 5),
-                                                                 cv=StratifiedGroupKFold(k, n_original),
+                                                                 cv=splitter,
                                                                  verbose=False, scoring=scoring[score_func],
-                                                                 n_jobs=-1)
+                                                                 n_jobs=-1, shuffle=True)
         train_scores_mean = np.mean(train_scores, axis=1)
         train_scores_std = np.std(train_scores, axis=1)
         test_scores_mean = np.mean(valid_scores, axis=1)
@@ -100,6 +100,8 @@ def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new
         plt.plot(train_sizes, test_scores_mean, 'o-', color=colormap_test[ind],
                  label=f"Cross-validation score {score_func}")
         print(f"mean validation scores {score_func} in learning curve: {np.mean(valid_scores, axis=1)}")
+        if title:
+            plt.title(title)
 
     # Reordering legend
     handles, labels = plt.gca().get_legend_handles_labels()
@@ -108,9 +110,8 @@ def plot_learning_curve(X, y, group, cv, k=5, scoring={'mapk': H.mapk_scorer_new
     plt.grid()
     plt.xlabel("Training examples")
     plt.ylabel("Precision")
-    plt.savefig('LearningCurve.png', bbox_inches='tight')
-    # fig.show()
-    # return train_sizes, train_scores, valid_scores
+    plt.savefig(f'LearningCurve.png', bbox_inches='tight')
+    # plt.show()
 
 def top_n_logistic_model_coefficients(CV, X):
     for i in range(CV.best_estimator_['model'].coef_.shape[0]):
