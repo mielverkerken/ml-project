@@ -113,7 +113,10 @@ def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, f
     ], verbose=False)
 
     splitter = StratifiedGroupKFold(k, n_original)
-    scoring = {'topk': H.top3_acc_scorer_new, 'mapk':  H.mapk_scorer_new, 'accuracy': make_scorer(accuracy_score)}
+    scoring = {'topk': H.top3_acc_scorer_new,
+               'mapk':  H.mapk_scorer_new,
+               'accuracy': make_scorer(accuracy_score)}
+
 
     CV = GridSearchCV(pipe, tuned_param, cv=splitter, scoring=scoring, verbose=1, n_jobs=n_jobs, refit='mapk', return_train_score = True)
     CV.fit(x_data, y_data, groups)
@@ -124,10 +127,10 @@ def tune_pipeline_2(x_data, y_data, model, scaler, tuned_param, sorted_labels, f
     results_to_df(CV, tuned_param, show=verbose, fileName=fileName)
 
     if confusion_matrix:
-        plot_confusion_matrix(x_data, y_data, groups, CV, sorted_labels, k)
+        plot_confusion_matrix(x_data, y_data, groups, CV, sorted_labels, splitter=splitter)
 
     if learning_curve:
-        plot_learning_curve(x_data, y_data, groups, CV, k=k, scoring=scoring, n_original=n_original)
+        plot_learning_curve(x_data, y_data, groups, CV, scoring=scoring, splitter=splitter)
 
     return CV 
 
@@ -168,7 +171,7 @@ def results_to_df(CV, tuned_parameters, show=True, fileName=None):
       display(train_result)
 
     if (fileName):
-      results.to_csv(f'../results/{fileName}.csv', index = None, header=True)
+      results.to_csv(f'../results/{fileName}.csv', index=None, header=True)
 
     return train_result, test_result, results
 
