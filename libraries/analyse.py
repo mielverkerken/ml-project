@@ -105,7 +105,7 @@ def plot_learning_curve(X, y, group, cv, scoring={'mapk': H.mapk_scorer_new}, ti
 
     # Reordering legend
     handles, labels = plt.gca().get_legend_handles_labels()
-    plt.gca().legend(handles=handles[0::2]+handles[1::2])
+    plt.gca().legend(handles=handles[0::2]+handles[1::2], prop={'size': 8})
 
     plt.grid()
     plt.xlabel("Training examples")
