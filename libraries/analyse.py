@@ -60,7 +60,7 @@ def _plot_confusion_matrix(y_true, y_pred, classes,
                     ha="center", va="center",
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
-    plt.savefig('ConfusionMartrix.png', bbox_inches='tight')
+    plt.savefig('../ConfusionMartrix.png', bbox_inches='tight')
     # fig.show()
 
 def plot_confusion_matrix(X, Y, group, cv, labels, print_cm=True, splitter=StratifiedGroupKFold(5)):
@@ -110,7 +110,7 @@ def plot_learning_curve(X, y, group, cv, scoring={'mapk': H.mapk_scorer_new}, ti
     plt.grid()
     plt.xlabel("Training examples")
     plt.ylabel("Precision")
-    plt.savefig(f'LearningCurve.png', bbox_inches='tight')
+    plt.savefig(f'../LearningCurve.png', bbox_inches='tight')
     # plt.show()
 
 def top_n_logistic_model_coefficients(CV, X):
