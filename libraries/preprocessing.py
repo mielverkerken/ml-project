@@ -9,10 +9,10 @@ def normilizeSample(sample):
 	return (sample - mean) / std
 
 
-def remove_missing_keypoints(sample):
+def remove_missing_keypoints(sample, prec=0):
 	missing_removed = np.copy(sample)
 	# Replace x and y coordinate with 0 if confidence is negative
-	missing_removed[missing_removed[:, :, 2] < 0] = 0
+	missing_removed[missing_removed[:, :, 2] < prec] = 0
 	# Only replacing x and y coordinate of 0 with nan
 	missing_removed[:, :, 0:2][missing_removed[:, :, 0:2] == 0] = np.nan
 	return missing_removed
@@ -25,15 +25,15 @@ def keypoints_nan_to_zero(sample):
 	return nan_to_zero
 
 
-def preprocess_sample(sample):
-	pre_sample = remove_missing_keypoints(sample)
+def preprocess_sample(sample, prec=0):
+	pre_sample = remove_missing_keypoints(sample, prec=prec)
 	return normilizeSample(pre_sample)
 
 
-def preprocess(all_samples, verbose=False):
+def preprocess(all_samples, verbose=False, prec=0):
 	if verbose:
 		print(f"Preprocessing {len(all_samples)} samples")
-	return np.array([preprocess_sample(s) for s in all_samples])
+	return np.array([preprocess_sample(s, prec=prec) for s in all_samples])
 
 
 def preprocess_test(all_samples, verbose=False):
