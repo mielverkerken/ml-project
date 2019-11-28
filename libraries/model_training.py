@@ -16,6 +16,8 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
+from sklearn.feature_selection import SelectFromModel
+from sklearn.base import TransformerMixin, BaseEstimator
 
 from IPython.display import HTML, display
 import pandas as pd
@@ -177,3 +179,25 @@ def results_to_df(CV, tuned_parameters, show=True, fileName=None):
 
 def get_n_numbers(n, start, end):
     return np.array([math.ceil(x) for x in np.linspace(0,1,n+1) * (end - start) + start])[1:]
+
+
+class FeatureSelection_Supervised(TransformerMixin, BaseEstimator):
+    def __init__(self, model_feature=None, threshold=None):
+        # n_estimators=10,
+        self.threshold = threshold
+        self.ss = None
+        # self.n_estimators = n_estimators
+        # self.x_new = None
+        self.model_feature = model_feature
+
+    def fit(self, X, y):
+        # m = self.model(self.n_estimators)
+        self.model_feature.fit(X, y)
+        print(f"Mean importance: {self.model_feature.feature_importances_.mean()}")
+        self.ss = SelectFromModel(self.model_feature, prefit=False, threshold=self.threshold).fit(X, y)
+        return self
+
+    def transform(self, X):
+        x_new = self.ss.transform(X)
+        print(f"Number of features (initial): {x_new.shape[1]} ({X.shape[1]})")
+        return x_new
