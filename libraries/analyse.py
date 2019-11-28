@@ -120,21 +120,31 @@ def top_n_logistic_model_coefficients(CV, X):
         for a, b in sorted(feature_weights, key = lambda t: t[1], reverse=True)[0:5]:
             print(a,b)
 
-def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fill=100, cmap="jet", filename="LogReg"):
+def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fill=100, cmap="jet", filename="LogReg", repeat=False, figsize=(9,6)):
+    if repeat:
+        unique_repeat = np.unique(df[repeat])
+        nrows = unique_repeat.shape[0]
+    else:
+        nrows = 1
+    all_data = df
     folds = ["train", "test"]
-    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(9, 6))
-    for ax, fold in zip(axs, folds):
-        data = df.pivot(index=ylabel[0], columns=xlabel[0], values=f"mean_{fold}_mapk")
-        x = np.log10(data.columns) if xscale == "log" else data.columns
-        y = np.log10(data.index) if yscale == "log" else data.index
-        z = data
-        lines = ax.contour(x, y, z, n_line, colors="black")
-        fills = ax.contourf(x, y, z, n_fill, cmap=cmap)
-        ax.clabel(lines, inline=True, fontsize=8)
-        plt.colorbar(fills, ax=ax)
-        ax.set_title("Train" if fold == "train" else "Cross-validation")
-        ax.set_xlabel(xlabel[1])
-        ax.set_ylabel(ylabel[1])
+    fig, axs = plt.subplots(nrows=nrows, ncols=2, figsize=figsize)
+    for i in range(nrows):
+        axs_row = axs if nrows == 1 else axs[i]
+        for ax, fold in zip(axs_row, folds):
+            if repeat:
+                all_data = df[df[repeat] == unique_repeat[i]]
+            data = all_data.pivot_table(index=ylabel[0], columns=xlabel[0], values=f"mean_{fold}_mapk", aggfunc=np.max)
+            x = np.log10(data.columns) if xscale == "log" else data.columns
+            y = np.log10(data.index) if yscale == "log" else data.index
+            z = data
+            lines = ax.contour(x, y, z, n_line, colors="black")
+            fills = ax.contourf(x, y, z, n_fill, cmap=cmap)
+            ax.clabel(lines, inline=True, fontsize=8)
+            cbar = plt.colorbar(fills, ax=ax)
+            ax.set_title("Train" if fold == "train" else "Cross-validation")
+            ax.set_xlabel(xlabel[1])
+            ax.set_ylabel(ylabel[1])
     plt.tight_layout()
     plt.savefig(f"{filename}_2d_mapk.png")
     plt.show()
