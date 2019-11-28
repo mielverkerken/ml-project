@@ -138,8 +138,16 @@ def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fil
             if repeat:
                 all_data = df[df[repeat] == unique_repeat[i]]
             data = all_data.pivot_table(index=ylabel[0], columns=xlabel[0], values=f"mean_{fold}_mapk", aggfunc=np.max)
-            x = np.log10(data.columns) if xscale == "log" else data.columns
-            y = np.log10(data.index) if yscale == "log" else data.index
+            x = data.columns
+            y = data.index
+            if xscale == "log":
+                x = np.log10(data.columns)
+            if xscale == "log2":
+                x = np.log2(data.columns)
+            if yscale == "log":
+                y = np.log10(data.index)
+            if yscale == "log2":
+                y = np.log2(data.index)
             z = data
             lines = ax.contour(x, y, z, n_line, colors="black")
             fills = ax.contourf(x, y, z, n_fill, cmap=cmap)
