@@ -120,6 +120,9 @@ def top_n_logistic_model_coefficients(CV, X):
         for a, b in sorted(feature_weights, key = lambda t: t[1], reverse=True)[0:5]:
             print(a,b)
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fill=100, cmap="jet", filename="LogReg", repeat=False, figsize=(9,6)):
     if repeat:
         unique_repeat = np.unique(df[repeat])
@@ -146,5 +149,7 @@ def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fil
             ax.set_xlabel(xlabel[1])
             ax.set_ylabel(ylabel[1])
     plt.tight_layout()
+    if repeat:
+        fig.suptitle(f"{repeat} - {unique_repeat}", fontsize=16, y=1.01)
     plt.savefig(f"{filename}_2d_mapk.png")
     plt.show()
