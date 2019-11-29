@@ -123,7 +123,7 @@ def top_n_logistic_model_coefficients(CV, X):
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fill=100, cmap="jet", filename="LogReg", repeat=False, figsize=(9,6)):
+def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fill=100, cmap="jet", filename="LogReg", repeat=False, figsize=None):
     if repeat:
         unique_repeat = np.unique(df[repeat])
         nrows = unique_repeat.shape[0]
@@ -131,6 +131,8 @@ def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fil
         nrows = 1
     all_data = df
     folds = ["train", "test"]
+    display(df[df["mean_test_mapk"] == df["mean_test_mapk"].max()])
+    figsize = figsize if figsize else (9, 6*nrows)
     fig, axs = plt.subplots(nrows=nrows, ncols=2, figsize=figsize)
     for i in range(nrows):
         axs_row = axs if nrows == 1 else axs[i]
