@@ -7,6 +7,7 @@ from sklearn.model_selection import learning_curve
 import util.helpers as H
 from sklearn.metrics import make_scorer
 import matplotlib.cm as cm
+from IPython.display import HTML, display
 
 def _plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
