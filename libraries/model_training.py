@@ -183,17 +183,19 @@ def get_n_numbers(n, start, end):
 
 class FeatureSelection_Supervised(TransformerMixin, BaseEstimator):
     def __init__(self, model_feature=None, threshold=None):
-        # n_estimators=10,
         self.threshold = threshold
         self.ss = None
-        # self.n_estimators = n_estimators
-        # self.x_new = None
         self.model_feature = model_feature
 
     def fit(self, X, y):
-        # m = self.model(self.n_estimators)
         self.model_feature.fit(X, y)
-        print(f"Mean importance: {self.model_feature.feature_importances_.mean()}")
+        if hasattr(self.model_feature, 'coef_'):
+            print(f"Mean importance: {self.model_feature.coef_.mean()}")
+        if hasattr(self.model_feature, 'feature_importances_'):
+            print(f"Mean importance: {self.model_feature.feature_importances_.mean()}")
+        if not (hasattr(self.model_feature, 'coef_') or hasattr(self.model_feature, 'feature_importances_')):
+            raise Exception('model_feature should contain feature_importances_ or coef_')
+
         self.ss = SelectFromModel(self.model_feature, prefit=False, threshold=self.threshold).fit(X, y)
         return self
 
