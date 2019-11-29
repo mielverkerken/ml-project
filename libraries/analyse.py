@@ -162,5 +162,5 @@ def plot_2D_score(df, xlabel, ylabel, xscale=None, yscale=None, n_line=10, n_fil
     plt.tight_layout()
     if repeat:
         fig.suptitle(f"{repeat} - {unique_repeat}", fontsize=16, y=1.01)
-    plt.savefig(f"{filename}_2d_mapk.png")
+    plt.savefig(f"../{filename}_2d_mapk.png")
     plt.show()
