@@ -75,7 +75,7 @@ def plot_confusion_matrix(X, Y, group, cv, labels, print_cm=True, splitter=Strat
         y_tot_pred = np.concatenate((y_tot_pred, y_pred), axis=0)
     _plot_confusion_matrix(y_tot_true, y_tot_pred, labels, normalize=True, title='Confusion matrix, with normalization', print_cm=print_cm)
 
-def plot_learning_curve(X, y, group, cv, scoring={'mapk': H.mapk_scorer_new}, title=None, splitter=StratifiedGroupKFold(5), shuffle=True):
+def plot_learning_curve(X, y, group, cv, scoring={'mapk': H.mapk_scorer_new}, title=None, splitter=StratifiedGroupKFold(5), shuffle=True, verbose=False, train_sizes=np.linspace(0.1, 1.0, 5)):
     colormap_train = cm.Reds(np.flip(np.linspace(0.7, 1, len(scoring))))
     colormap_test = cm.Greens(np.flip(np.linspace(0.7, 1, len(scoring))))
 
@@ -83,9 +83,9 @@ def plot_learning_curve(X, y, group, cv, scoring={'mapk': H.mapk_scorer_new}, ti
     for ind, score_func in enumerate(scoring):
         train_sizes, train_scores, valid_scores = learning_curve(cv.best_estimator_, X, y,
                                                                  groups=group,
-                                                                 train_sizes=np.linspace(0.1, 1.0, 5),
+                                                                 train_sizes=train_sizes,
                                                                  cv=splitter,
-                                                                 verbose=False, scoring=scoring[score_func],
+                                                                 verbose=verbose, scoring=scoring[score_func],
                                                                  n_jobs=-1, shuffle=shuffle)
         train_scores_mean = np.mean(train_scores, axis=1)
         train_scores_std = np.std(train_scores, axis=1)
