@@ -203,3 +203,59 @@ class FeatureSelection_Supervised(TransformerMixin, BaseEstimator):
         x_new = self.ss.transform(X)
         print(f"Number of features (initial): {x_new.shape[1]} ({X.shape[1]})")
         return x_new
+
+
+# %%
+import numpy as np
+from sklearn.base import BaseEstimator, ClassifierMixin
+import pdb
+
+class Ensemble2class(BaseEstimator, ClassifierMixin):
+    """An example of classifier"""
+
+    def __init__(self, model1, model2):
+        """
+        Called when initializing the classifier
+        """
+        self.model1 = model1
+        self.model2 = model2
+
+    def fit(self, X, y=None):
+        """
+        This should fit classifier. All the "work" should be done here.
+
+        Note: assert is not a good choice here and you should rather
+        use try/except blog with exceptions. This is just for short syntax.
+        """
+        # First model
+        y1 = np.copy(y)
+        y1[y1 == 8] = 3
+        y1[y > 8] = y1[y > 8] - 1
+        self.model1.fit(X, y1)
+
+        # Second model
+        mask = np.logical_or(y == 8, y == 3)
+        y2 = np.copy(y)[mask]
+        y2[y2 == 3] = 0
+        y2[y2 == 8] = 1
+        self.model2.fit(X[mask], y2)
+        self.classes_, y = np.unique(y, return_inverse=True)
+        return self
+
+    def predict(self, X, y=None):
+        # pdb.set_trace()
+        return np.flip(np.argsort(self.predict_proba(X), axis=1), axis=1)[:, 0]
+
+    def predict_proba(self, X):
+        X_ = np.zeros((len(X),18))
+        # pdb.set_trace()
+        pred1 = self.model1.predict_proba(X)
+        # pdb.set_trace()
+        X_[:,0:3] = pred1[:, 0:3]
+        X_[:,4:8] = pred1[:, 4:8]
+        X_[:,9:18] = pred1[:, 8:17]
+        # pdb.set_trace()
+        pred2 = self.model2.predict_proba(X)
+        X_[:, 3] = pred2[:, 0] * pred1[:, 3]
+        X_[:, 8] = pred2[:, 1] * pred1[:, 3]
+        return X_
