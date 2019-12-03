@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 import util.helpers as H
 
@@ -18,6 +19,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.feature_selection import SelectFromModel
 from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.base import BaseEstimator, ClassifierMixin
 
 from IPython.display import HTML, display
 import pandas as pd
@@ -204,12 +206,6 @@ class FeatureSelection_Supervised(TransformerMixin, BaseEstimator):
         print(f"Number of features (initial): {x_new.shape[1]} ({X.shape[1]})")
         return x_new
 
-
-# %%
-import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin
-import pdb
-
 class Ensemble2class(BaseEstimator, ClassifierMixin):
     """An example of classifier"""
 
@@ -248,14 +244,12 @@ class Ensemble2class(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
         X_ = np.zeros((len(X),18))
-        # pdb.set_trace()
         pred1 = self.model1.predict_proba(X)
-        # pdb.set_trace()
+        mask = np.flip(np.argsort(pred1, axis=1), axis=1)[:, 0] == 3
         X_[:,0:3] = pred1[:, 0:3]
         X_[:,4:8] = pred1[:, 4:8]
         X_[:,9:18] = pred1[:, 8:17]
-        # pdb.set_trace()
-        pred2 = self.model2.predict_proba(X)
-        X_[:, 3] = pred2[:, 0] * pred1[:, 3]
-        X_[:, 8] = pred2[:, 1] * pred1[:, 3]
+        pred2 = self.model2.predict_proba(X[mask])
+        X_[mask, 3] = pred2[:, 0] * pred1[mask, 3]
+        X_[mask, 8] = pred2[:, 1] * pred1[mask, 3]
         return X_
